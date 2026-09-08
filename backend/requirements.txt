@@ -12,8 +12,21 @@ pydantic==2.10.4
 pydantic-settings==2.7.0
 
 # Auth
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
+# PyJWT instead of python-jose: python-jose is unmaintained and its last
+# release still carries unfixed CVEs. Both sign and verify the same tokens.
+# The [crypto] extra is only needed for RS256/ES256. HS256 works without it,
+# but it is here so switching to a key pair later is a one-line change.
+pyjwt[crypto]==2.13.0
+
+# pwdlib instead of passlib: passlib 1.7.4 reads bcrypt.__about__, which
+# bcrypt removed in 4.1, so the pair only works if you pin bcrypt==4.0.1
+# forever. pwdlib is the maintained replacement and needs no pin.
+#
+# The [argon2] extra, not [bcrypt], because PasswordHash.recommended() is
+# Argon2. Argon2 is memory-hard and has no input length limit, while bcrypt
+# 5.0 raises on passwords over 72 bytes instead of truncating them.
+pwdlib[argon2]==0.3.1
+
 pyotp==2.9.0
 
 # File uploads
