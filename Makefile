@@ -1,14 +1,14 @@
 # Shortcuts so we don't have to type long docker commands every time.
 # Run any of these with: make <name>, e.g. "make dev"
 
-.PHONY: dev down logs backend-shell db-shell
+.PHONY: dev stop logs backend-shell db-shell
 
 # Builds the images (if needed) and starts backend + database containers.
 dev:
 	docker compose up --build
 
 # Stops and removes the running containers.
-down:
+stop:
 	docker compose down
 
 # Streams live logs from all running containers, useful for debugging.
