@@ -4,12 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.router import router as auth_router
 from app.core.db import get_db
+from app.users.router import router as users_router
 
 app = FastAPI(title="Task Tracker API")
 
 # Routers are attached here, not defined here. main.py stays a table of
 # contents: what the app is, and which groups of endpoints it serves.
 app.include_router(auth_router)
+app.include_router(users_router)
 
 
 @app.get("/health")
