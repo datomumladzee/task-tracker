@@ -8,7 +8,9 @@ asyncpg==0.30.0
 alembic==1.14.0
 
 # Validation & settings
-pydantic==2.10.4
+# The [email] extra pulls in email-validator, which is what backs EmailStr.
+# Pydantic does not validate email addresses on its own.
+pydantic[email]==2.10.4
 pydantic-settings==2.7.0
 
 # Auth
