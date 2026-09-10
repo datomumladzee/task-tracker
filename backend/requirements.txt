@@ -33,3 +33,13 @@ pyotp==2.9.0
 
 # File uploads
 python-multipart==0.0.20
+
+# Testing
+# In the same file as the app dependencies because there is one image and one
+# local setup. Split into requirements-dev.txt if a production build is ever
+# added, so pytest does not ship with the app.
+pytest==9.1.1
+pytest-asyncio==1.4.0
+# httpx drives the app in-process through ASGITransport, so tests need no
+# running server and no ports.
+httpx==0.28.1
