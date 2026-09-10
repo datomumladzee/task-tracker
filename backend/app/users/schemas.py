@@ -84,3 +84,40 @@ class LoginResponse(BaseModel):
     access_token: str | None = None
     pending_token: str | None = None
     token_type: str = "bearer"
+
+
+class TotpSetupResponse(BaseModel):
+    """What POST /auth/2fa/setup returns.
+
+    The URI carries the secret in clear text, which is why this endpoint is
+    authenticated and why the value must never be logged. The frontend turns
+    it into a QR code and shows it once.
+
+    secret is returned as well so a user whose camera will not cooperate can
+    type it into the app by hand. 2FA is still off at this point.
+    """
+
+    provisioning_uri: str
+    secret: str
+
+
+class TotpCode(BaseModel):
+    """Six digits from the authenticator app.
+
+    min and max both 6 so a wrong length is a 422 and never reaches the
+    verification path.
+    """
+
+    code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
+
+
+class TotpLoginRequest(BaseModel):
+    """Step two of login: the pending token plus a code.
+
+    The pending token is what says who is asking. Without it this endpoint
+    would need the email again, and would then be a way to test codes against
+    any account.
+    """
+
+    pending_token: str
+    code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")

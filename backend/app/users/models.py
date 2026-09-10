@@ -73,6 +73,21 @@ class User(Base):
         server_default=func.now(),
     )
 
+    # The shared TOTP secret, base32. Null until the user starts 2FA setup.
+    #
+    # Stored in clear text, unlike hashed_password. A password only ever needs
+    # to be compared, so a hash is enough. A TOTP secret has to be fed back
+    # into the algorithm on every login, so the server must be able to read it.
+    # Doing this properly means encrypting it at rest under a separate key.
+    # Skipped deliberately for now, and worth revisiting before this holds real
+    # accounts: anyone who reads this column can generate valid codes.
+    totp_secret: Mapped[str | None] = mapped_column(String(64), default=None)
+
+    # Separate from totp_secret on purpose. Having a secret means setup was
+    # started. This means a code was actually confirmed. Without the gap, a
+    # failed QR scan would lock the user out of their own account.
+    totp_enabled: Mapped[bool] = mapped_column(default=False, server_default="false")
+
 
     def __repr__(self) -> str:
         # role is None on an object that has not been flushed yet, because

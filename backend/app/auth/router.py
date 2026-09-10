@@ -2,9 +2,20 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
-from app.core.security import create_access_token
+from app.core.deps import get_current_user
+from app.core.security import create_access_token, decode_token
+from app.core.totp import provisioning_uri
 from app.users import service
-from app.users.schemas import LoginRequest, LoginResponse, UserCreate, UserRead
+from app.users.models import User
+from app.users.schemas import (
+    LoginRequest,
+    LoginResponse,
+    TotpCode,
+    TotpLoginRequest,
+    TotpSetupResponse,
+    UserCreate,
+    UserRead,
+)
 
 # The HTTP layer, and the only place in the auth flow that knows status codes
 # exist. It calls downward into the service and translates what comes back.
@@ -70,11 +81,113 @@ async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)) -> Login
             detail="This account is disabled",
         )
 
-    # Where the second factor will branch. Once User has totp_enabled, this
-    # becomes: if enabled, return mfa_required=True with a pending_token from
-    # create_access_token(user.id, token_type="pending_2fa") and no access
-    # token. The response shape already covers both, so adding it changes no
-    # contract and no frontend code.
+    if user.totp_enabled:
+        # The password was right but it is not enough. No access token is
+        # issued here. The pending token only says who is asking, expires in
+        # five minutes, and decode_token refuses it anywhere an access token
+        # is required.
+        return LoginResponse(
+            mfa_required=True,
+            pending_token=create_access_token(user.id, token_type="pending_2fa"),
+        )
+
+    return LoginResponse(
+        mfa_required=False,
+        access_token=create_access_token(user.id),
+    )
+
+
+@router.post("/2fa/setup", response_model=TotpSetupResponse)
+async def totp_setup(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> TotpSetupResponse:
+    """Start 2FA setup. Generates a secret and returns a QR payload.
+
+    Authenticated, because the response carries the secret in clear text.
+    2FA is not on when this returns, /2fa/verify is what switches it on.
+    """
+    try:
+        secret = await service.start_totp_setup(db, user)
+    except service.TotpAlreadyEnabled:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Two-factor authentication is already enabled",
+        ) from None
+
+    return TotpSetupResponse(
+        provisioning_uri=provisioning_uri(secret, user.email),
+        secret=secret,
+    )
+
+
+@router.post("/2fa/verify", response_model=UserRead)
+async def totp_verify(
+    data: TotpCode,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """Confirm the first code and enable 2FA.
+
+    Proves the app was actually paired before the account starts depending on
+    it. Returns the updated user so a client can see totp_enabled flip.
+    """
+    try:
+        ok = await service.confirm_totp_setup(db, user, data.code)
+    except service.TotpNotStarted:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Call /auth/2fa/setup first",
+        ) from None
+
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid code",
+        )
+
+    return user
+
+
+@router.post("/2fa/login", response_model=LoginResponse)
+async def totp_login(
+    data: TotpLoginRequest,
+    db: AsyncSession = Depends(get_db),
+) -> LoginResponse:
+    """Step two of login. Pending token plus a code, for a real token.
+
+    Not protected by get_current_user, because the caller is not authenticated
+    yet. The pending token is read directly, and decode_token is told to
+    accept only that type, so an access token cannot be replayed here.
+    """
+    subject = decode_token(data.pending_token, expected_type="pending_2fa")
+
+    if subject is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired session, log in again",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = await service.get_user_by_id(db, int(subject))
+
+    # Re-checked rather than trusted from step one. The five minute window is
+    # long enough for an account to be deleted or disabled in between.
+    if user is None or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired session, log in again",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not await service.verify_totp_login(db, user, data.code):
+        # Same message whether the code was wrong or 2FA was turned off since
+        # the pending token was issued.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid code",
+        )
+
     return LoginResponse(
         mfa_required=False,
         access_token=create_access_token(user.id),

@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import hash_password, verify_password
+from app.core.totp import generate_secret, verify_code
 from app.users.models import User
 from app.users.schemas import UserCreate
 
@@ -98,3 +99,64 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> User
         return None
 
     return user
+
+
+class TotpAlreadyEnabled(Exception):
+    """2FA is already on for this user.
+
+    Setup must not silently replace a working secret. Doing so would let
+    anyone holding a live session quietly swap the second factor for their
+    own, which defeats the point of having one.
+    """
+
+
+class TotpNotStarted(Exception):
+    """No secret on the row, so there is nothing to verify against."""
+
+
+async def start_totp_setup(db: AsyncSession, user: User) -> str:
+    """Generate and store a new secret. Does not enable 2FA.
+
+    Returns the secret so the router can build the provisioning URI.
+
+    Overwriting an unconfirmed secret is fine and intentional: a user who
+    abandoned setup halfway can start again and the old secret was never
+    confirmed by anything.
+    """
+    if user.totp_enabled:
+        raise TotpAlreadyEnabled
+
+    user.totp_secret = generate_secret()
+    await db.commit()
+    return user.totp_secret
+
+
+async def confirm_totp_setup(db: AsyncSession, user: User, code: str) -> bool:
+    """Check the first code and switch 2FA on if it matches.
+
+    This is the step that makes the secret real. Enabling at setup time
+    instead would lock out anyone whose QR scan silently failed, because they
+    would have no working code and no way back in.
+    """
+    if user.totp_secret is None:
+        raise TotpNotStarted
+
+    if not verify_code(user.totp_secret, code):
+        return False
+
+    user.totp_enabled = True
+    await db.commit()
+    return True
+
+
+async def verify_totp_login(db: AsyncSession, user: User, code: str) -> bool:
+    """Check a code during login. Changes nothing.
+
+    Separate from confirm_totp_setup because that one has a side effect and
+    this one must not. Refuses when 2FA is off, so a stale pending token
+    cannot be spent against an account that has since turned 2FA off.
+    """
+    if not user.totp_enabled or user.totp_secret is None:
+        return False
+
+    return verify_code(user.totp_secret, code)
