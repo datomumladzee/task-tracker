@@ -1,3 +1,14 @@
+"""The entry point. `uvicorn app.main:app` imports this file and takes `app`.
+
+The two router imports below are the import dependency chain: importing one
+file runs its imports, which run theirs, so those lines pull in every other
+module in app/. Along the way each @router.post decorator attaches its route
+to a router, and each model registers itself on Base.metadata.
+
+config.py sits at the bottom of that chain, which is why a missing env var
+stops the app at startup instead of on some later request.
+"""
+
 from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
