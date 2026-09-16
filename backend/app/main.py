@@ -13,6 +13,10 @@ from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Registers every model. `from app import models` rather than `import
+# app.models`, which would bind the name `app` to the package right before
+# `app = FastAPI()` rebinds it.
+from app import models  # noqa: F401
 from app.auth.router import router as auth_router
 from app.core.db import get_db
 from app.users.router import router as users_router

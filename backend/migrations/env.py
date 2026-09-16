@@ -30,9 +30,7 @@ target_metadata = Base.metadata
 # registers on import, and Alembic imports this file, not the app. Without
 # these imports autogenerate compares nothing to nothing and writes a blank
 # migration with no error. Add each new model module here.
-from app.projects import models as project_models  # noqa: E402, F401
-from app.tasks import models as task_models  # noqa: E402, F401
-from app.users import models as user_models  # noqa: E402, F401
+from app import models  # noqa: E402, F401  every model, see app/models.py
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

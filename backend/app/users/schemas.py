@@ -50,6 +50,21 @@ class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserSummary(BaseModel):
+    """Another user, as seen by a teammate.
+
+    Smaller than UserRead on purpose. A project member list or a task assignee
+    should show who someone is, not their system role, whether their account is
+    active, or when they signed up.
+    """
+
+    id: int
+    email: EmailStr
+    full_name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class LoginRequest(BaseModel):
     """What POST /auth/login accepts.
 
