@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.projects.models import Project, ProjectMember, ProjectRole
 from app.users.service import get_user_by_email
@@ -149,9 +149,15 @@ async def get_membership(
 
     None means not a member, which the RBAC dependency will treat the same as
     the project not existing, so non-members cannot probe which ids are real.
+
+    The project is loaded with it, so member.project is usable afterwards.
+    joinedload rather than selectinload because this is one row pointing at
+    one project: a JOIN in the same query beats a second query.
     """
     result = await db.execute(
-        select(ProjectMember).where(
+        select(ProjectMember)
+        .options(joinedload(ProjectMember.project))
+        .where(
             ProjectMember.project_id == project_id,
             ProjectMember.user_id == user_id,
         )
