@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
+from app.core.unset import UNSET, Unset
 from app.projects.models import Project, ProjectMember, ProjectRole
 from app.users.service import get_user_by_email
 
@@ -36,19 +37,6 @@ class LastAdmin(Exception):
     """
 
 
-class _Unset:
-    """Marks an argument the caller did not pass.
-
-    None cannot mean that, because for description None is a real value that
-    means clear it. Without a separate marker a partial update cannot tell
-    "leave description alone" from "remove the description".
-    """
-
-    def __repr__(self) -> str:
-        return "UNSET"
-
-
-UNSET = _Unset()
 
 
 # ---------------------------------------------------------------------------
@@ -107,17 +95,17 @@ async def update_project(
     db: AsyncSession,
     project: Project,
     *,
-    name: str | _Unset = UNSET,
-    description: str | None | _Unset = UNSET,
+    name: str | Unset = UNSET,
+    description: str | None | Unset = UNSET,
 ) -> Project:
     """Change only the fields that were passed.
 
     name has no None option because the column is NOT NULL. description does,
     because clearing it is a legitimate edit.
     """
-    if not isinstance(name, _Unset):
+    if not isinstance(name, Unset):
         project.name = name
-    if not isinstance(description, _Unset):
+    if not isinstance(description, Unset):
         project.description = description
 
     await db.commit()
