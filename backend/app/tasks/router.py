@@ -2,11 +2,19 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
-from app.projects.deps import require_project_role
+from app.projects.deps import ROLE_RANK, require_project_role
 from app.projects.models import ProjectMember, ProjectRole
 from app.tasks import service
-from app.tasks.models import Task, TaskStatus
-from app.tasks.schemas import TaskCreate, TaskMove, TaskRead, TaskUpdate
+from app.tasks.models import Comment, Task, TaskStatus
+from app.tasks.schemas import (
+    CommentCreate,
+    CommentRead,
+    CommentUpdate,
+    TaskCreate,
+    TaskMove,
+    TaskRead,
+    TaskUpdate,
+)
 
 # Nested under a project, so the project id is in the path and the same
 # require_project_role dependency that guards projects guards tasks too.
@@ -135,3 +143,95 @@ async def delete_task(
     the task's comments with it. Everything else on a task can be undone."""
     task = await _task_or_404(db, member.project_id, task_id)
     await service.delete_task(db, task)
+
+
+# ---------------------------------------------------------------------------
+# comments
+# ---------------------------------------------------------------------------
+#
+# A comment belongs to a person, not just to a project, so the rules differ
+# from tasks. Editing is author only: nobody, admin included, rewrites what
+# someone else said. Deleting is author or project admin, because an admin has
+# to be able to remove abuse or a leaked secret. Same split as Jira, Linear
+# and GitHub.
+
+
+async def _comment_or_404(db: AsyncSession, task_id: int, comment_id: int) -> Comment:
+    comment = await service.get_comment(db, task_id, comment_id)
+    if comment is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Comment not found",
+        )
+    return comment
+
+
+@router.post(
+    "/{task_id}/comments",
+    response_model=CommentRead,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_comment(
+    task_id: int,
+    data: CommentCreate,
+    member: ProjectMember = Depends(standard),
+    db: AsyncSession = Depends(get_db),
+) -> Comment:
+    await _task_or_404(db, member.project_id, task_id)
+    return await service.create_comment(
+        db, task_id=task_id, author_id=member.user_id, body=data.body
+    )
+
+
+@router.get("/{task_id}/comments", response_model=list[CommentRead])
+async def list_comments(
+    task_id: int,
+    member: ProjectMember = Depends(viewer),
+    db: AsyncSession = Depends(get_db),
+) -> list[Comment]:
+    await _task_or_404(db, member.project_id, task_id)
+    return await service.list_comments(db, task_id)
+
+
+@router.patch("/{task_id}/comments/{comment_id}", response_model=CommentRead)
+async def update_comment(
+    task_id: int,
+    comment_id: int,
+    data: CommentUpdate,
+    member: ProjectMember = Depends(standard),
+    db: AsyncSession = Depends(get_db),
+) -> Comment:
+    await _task_or_404(db, member.project_id, task_id)
+    comment = await _comment_or_404(db, task_id, comment_id)
+
+    if comment.author_id != member.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the author can edit a comment",
+        )
+
+    return await service.update_comment(db, comment, body=data.body)
+
+
+@router.delete(
+    "/{task_id}/comments/{comment_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_comment(
+    task_id: int,
+    comment_id: int,
+    member: ProjectMember = Depends(viewer),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    await _task_or_404(db, member.project_id, task_id)
+    comment = await _comment_or_404(db, task_id, comment_id)
+
+    is_author = comment.author_id == member.user_id
+    is_admin = ROLE_RANK[member.role] >= ROLE_RANK[ProjectRole.ADMIN]
+    if not (is_author or is_admin):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the author or a project admin can delete a comment",
+        )
+
+    await service.delete_comment(db, comment)

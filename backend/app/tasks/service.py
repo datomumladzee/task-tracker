@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.unset import UNSET, Unset
 from app.projects.models import ProjectMember
-from app.tasks.models import Task, TaskPriority, TaskStatus
+from app.tasks.models import Comment, Task, TaskPriority, TaskStatus
 from app.tasks.position import needs_rebalance, position_at_end, position_between, rebalance
 from app.users.models import User
 
@@ -344,3 +344,59 @@ async def _last_position_excluding(
         .order_by(Task.position.desc())
         .limit(1)
     )
+
+
+# ---------------------------------------------------------------------------
+# comments
+# ---------------------------------------------------------------------------
+
+
+async def create_comment(
+    db: AsyncSession,
+    *,
+    task_id: int,
+    author_id: int,
+    body: str,
+) -> Comment:
+    author = await db.get(User, author_id)
+    comment = Comment(task_id=task_id, author_id=author_id, author=author, body=body)
+    db.add(comment)
+    await db.commit()
+    return comment
+
+
+async def list_comments(db: AsyncSession, task_id: int) -> list[Comment]:
+    """A task's comments, oldest first.
+
+    Matches ix_comments_task, so the order comes from the index. selectinload
+    fetches every author in one extra query rather than one per comment.
+    """
+    result = await db.execute(
+        select(Comment)
+        .options(selectinload(Comment.author))
+        .where(Comment.task_id == task_id)
+        .order_by(Comment.created_at, Comment.id)
+    )
+    return list(result.scalars().all())
+
+
+async def get_comment(db: AsyncSession, task_id: int, comment_id: int) -> Comment | None:
+    """One comment, scoped to its task, so an id from another task is missing
+    rather than forbidden."""
+    result = await db.execute(
+        select(Comment)
+        .options(selectinload(Comment.author))
+        .where(Comment.task_id == task_id, Comment.id == comment_id)
+    )
+    return result.scalar_one_or_none()
+
+
+async def update_comment(db: AsyncSession, comment: Comment, *, body: str) -> Comment:
+    comment.body = body
+    await db.commit()
+    return comment
+
+
+async def delete_comment(db: AsyncSession, comment: Comment) -> None:
+    await db.delete(comment)
+    await db.commit()

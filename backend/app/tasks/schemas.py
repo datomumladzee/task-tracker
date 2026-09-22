@@ -95,3 +95,34 @@ class TaskRead(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+CommentBody = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=5000),
+]
+
+
+class CommentCreate(BaseModel):
+    body: CommentBody
+
+
+class CommentUpdate(BaseModel):
+    body: CommentBody
+
+
+class CommentRead(BaseModel):
+    """A comment with its author.
+
+    author is nullable because comments.author_id is ON DELETE SET NULL: the
+    thread survives someone leaving, and the frontend shows a deleted user.
+    """
+
+    id: int
+    task_id: int
+    author: UserSummary | None
+    body: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
