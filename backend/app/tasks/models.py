@@ -53,6 +53,14 @@ class Task(Base):
         Index("ix_tasks_assignee", "assignee_id"),
     )
 
+    # Fetch server-generated values back in the same statement, via
+    # UPDATE ... RETURNING. updated_at is set by Postgres through
+    # onupdate=func.now(), so without this the attribute is expired after a
+    # commit and Pydantic triggers a lazy reload while serialising the
+    # response, which fails under async with MissingGreenlet.
+    __mapper_args__ = {"eager_defaults": True}
+
+
     id: Mapped[int] = mapped_column(primary_key=True)
 
     # NOT NULL. A task with no project would need a branch in every permission
@@ -144,6 +152,14 @@ class Comment(Base):
         # A task's comments, oldest first, without a sort step.
         Index("ix_comments_task", "task_id", "created_at"),
     )
+
+    # Fetch server-generated values back in the same statement, via
+    # UPDATE ... RETURNING. updated_at is set by Postgres through
+    # onupdate=func.now(), so without this the attribute is expired after a
+    # commit and Pydantic triggers a lazy reload while serialising the
+    # response, which fails under async with MissingGreenlet.
+    __mapper_args__ = {"eager_defaults": True}
+
 
     id: Mapped[int] = mapped_column(primary_key=True)
 

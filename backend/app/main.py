@@ -20,6 +20,7 @@ from app import models  # noqa: F401
 from app.auth.router import router as auth_router
 from app.core.db import get_db
 from app.projects.router import router as projects_router
+from app.tasks.router import router as tasks_router
 from app.users.router import router as users_router
 
 app = FastAPI(title="Task Tracker API")
@@ -29,6 +30,7 @@ app = FastAPI(title="Task Tracker API")
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(projects_router)
+app.include_router(tasks_router)
 
 
 @app.get("/health")
