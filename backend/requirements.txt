@@ -10,7 +10,8 @@ alembic==1.14.0
 # Validation & settings
 # The [email] extra pulls in email-validator, which is what backs EmailStr.
 # Pydantic does not validate email addresses on its own.
-pydantic[email]==2.10.4
+# 2.13 rather than 2.10: google-genai needs pydantic >= 2.12.5.
+pydantic[email]==2.13.5
 pydantic-settings==2.7.0
 
 # Auth
@@ -33,6 +34,11 @@ pyotp==2.9.0
 
 # File uploads
 python-multipart==0.0.20
+
+# LLM
+# Google's Gemini SDK, used on the free tier. Only core/llm.py imports it, so
+# a different provider can replace it without touching the rest of the app.
+google-genai==2.25.0
 
 # Testing
 # In the same file as the app dependencies because there is one image and one
