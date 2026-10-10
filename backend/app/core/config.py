@@ -18,7 +18,10 @@ class Settings(BaseSettings):
     # starts and every other endpoint works; only the AI features refuse, with
     # a 503. Someone who clones the repo can run it before getting a key.
     gemini_api_key: str | None = None
-    gemini_model: str = "gemini-3.8-flash"
+    # flash-lite rather than the newest flash: on the free tier it was the only
+    # one that answered every time in testing, and it spends no tokens on
+    # thinking, so the daily limit lasts longer. Override with GEMINI_MODEL.
+    gemini_model: str = "gemini-3.5-flash-lite"
     # Seconds. A request slower than this is abandoned rather than holding a
     # server worker, and the caller is told the AI is unavailable.
     llm_timeout_seconds: float = 20.0

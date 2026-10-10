@@ -1,6 +1,7 @@
 """The only file in the app that knows which AI provider is used.
 
-Everything else calls complete() and catches the three errors defined here.
+Everything else calls complete() or complete_structured() and catches the
+errors defined here.
 Nothing outside this file imports google.genai or catches Google's error
 types, so swapping to a different provider later means rewriting this file
 and nothing else.
@@ -12,18 +13,22 @@ Google to improve its products, so only test data should ever pass through.
 import logging
 import time
 from dataclasses import dataclass
+from typing import TypeVar
 
 import httpx
 from google import genai
 from google.genai import errors, types
+from pydantic import BaseModel, ValidationError
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+SchemaT = TypeVar("SchemaT", bound=BaseModel)
+
 
 # ---------------------------------------------------------------------------
-# The three errors the rest of the app is allowed to know about
+# The errors the rest of the app is allowed to know about
 # ---------------------------------------------------------------------------
 
 
@@ -40,6 +45,15 @@ class LLMRateLimited(LLMError):
 
     Separate from LLMUnavailable because the right reaction differs: wait and
     retry, rather than tell the user the feature is down.
+    """
+
+
+class LLMBadOutput(LLMError):
+    """The model answered, but not in the shape that was asked for.
+
+    Even with a schema the model can return JSON that fails validation, a
+    missing field or a value outside an enum. Kept separate from unavailable:
+    the service is up, its answer was unusable.
     """
 
 
@@ -99,8 +113,8 @@ def _get_client() -> genai.Client:
     return _client
 
 
-async def complete(prompt: str) -> LLMResult:
-    """Send one prompt, get the reply and its measurements back.
+async def _generate(prompt: str, config: types.GenerateContentConfig) -> LLMResult:
+    """The one place a request is sent, timed, measured and logged.
 
     Uses models.generate_content rather than the newer interactions API shown
     in Google's quickstart. Both work, but interactions raises its errors from
@@ -114,15 +128,7 @@ async def complete(prompt: str) -> LLMResult:
         response = await client.aio.models.generate_content(
             model=settings.gemini_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                # On by default in the SDK. It lets the model call Python
-                # functions on its own, which we never want: the model only
-                # proposes, our code decides what runs. Off also silences the
-                # SDK's warning about using it here.
-                automatic_function_calling=types.AutomaticFunctionCallingConfig(
-                    disable=True
-                ),
-            ),
+            config=config,
         )
     except errors.APIError as e:
         # 429 is the free tier's per-minute or per-day cap.
@@ -160,3 +166,48 @@ async def complete(prompt: str) -> LLMResult:
         output_tokens=output_tokens,
         latency_ms=latency_ms,
     )
+
+
+def _base_config(**extra) -> types.GenerateContentConfig:
+    return types.GenerateContentConfig(
+        # On by default in the SDK. It lets the model call Python functions on
+        # its own, which we never want: the model only proposes, our code
+        # decides what runs. Off also silences the SDK's warning about it.
+        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+        **extra,
+    )
+
+
+async def complete(prompt: str) -> LLMResult:
+    """Send one prompt, get plain text and its measurements back."""
+    return await _generate(prompt, _base_config())
+
+
+async def complete_structured(
+    prompt: str,
+    schema: type[SchemaT],
+) -> tuple[SchemaT, LLMResult]:
+    """Send one prompt and get back an instance of `schema`, validated.
+
+    The provider is asked to reply in JSON matching the schema, but that is a
+    request, not a guarantee. The reply is validated with Pydantic here, so
+    nothing that fails the schema ever leaves this function.
+    """
+    result = await _generate(
+        prompt,
+        _base_config(
+            response_mime_type="application/json",
+            response_json_schema=schema.model_json_schema(),
+        ),
+    )
+
+    try:
+        parsed = schema.model_validate_json(result.text)
+    except ValidationError as e:
+        # The reply text is not logged or included, in case it echoes the
+        # user's input. Only how many fields failed.
+        raise LLMBadOutput(
+            f"reply did not match {schema.__name__} ({e.error_count()} errors)"
+        ) from e
+
+    return parsed, result
