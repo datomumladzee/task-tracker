@@ -13,12 +13,14 @@ drift apart. main.py and migrations/env.py both import this module instead, so
 adding a model means adding one line here.
 """
 
+from app.intake.models import IntakeDraft
 from app.projects.models import Project, ProjectMember, ProjectRole
 from app.tasks.models import Comment, Task, TaskPriority, TaskStatus
 from app.users.models import User, UserRole
 
 __all__ = [
     "Comment",
+    "IntakeDraft",
     "Project",
     "ProjectMember",
     "ProjectRole",

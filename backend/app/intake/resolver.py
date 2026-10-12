@@ -6,12 +6,9 @@ The model never sees ids and never decides one: this file is where every id
 in an AI-created task comes from.
 """
 
-import enum
-
-from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.intake.schemas import TaskDraft
+from app.intake.schemas import Candidate, Outcome, Resolution, ResolvedDraft, TaskDraft
 from app.projects.models import Project
 from app.projects.service import (
     find_members_by_reference,
@@ -22,48 +19,6 @@ from app.users.models import User
 
 # Words that mean the person typing. Compared after lowercasing.
 _SELF = {"me", "myself", "i", "self"}
-
-
-class Outcome(str, enum.Enum):
-    RESOLVED = "resolved"    # exactly one match, id is set
-    AMBIGUOUS = "ambiguous"  # several matches, pick from candidates
-    UNKNOWN = "unknown"      # no match, a question explains
-    NOT_GIVEN = "not_given"  # nothing was said, and nothing is needed
-    WAITING = "waiting"      # cannot be checked until the project is known
-
-
-class Candidate(BaseModel):
-    id: int
-    label: str
-
-
-class Resolution(BaseModel):
-    """The answer for one reference field.
-
-    A question rather than an error, so the frontend can show what the model
-    was unsure about and let the user fix it in place.
-    """
-
-    outcome: Outcome
-    ref: str | None = Field(description="The words the model returned for this field.")
-    id: int | None = None
-    candidates: list[Candidate] = []
-    question: str | None = None
-
-
-class ResolvedDraft(BaseModel):
-    draft: TaskDraft
-    project: Resolution
-    assignee: Resolution
-
-    @property
-    def ready(self) -> bool:
-        """True when nothing needs asking. A task must have a project; an
-        assignee is optional."""
-        return self.project.outcome == Outcome.RESOLVED and self.assignee.outcome in (
-            Outcome.RESOLVED,
-            Outcome.NOT_GIVEN,
-        )
 
 
 def _project_candidate(p: Project) -> Candidate:
@@ -116,7 +71,7 @@ async def _resolve_project(db: AsyncSession, ref: str | None, user_id: int) -> R
     )
 
 
-async def _resolve_assignee(
+async def resolve_assignee(
     db: AsyncSession,
     ref: str | None,
     project: Resolution,
@@ -160,5 +115,5 @@ async def _resolve_assignee(
 async def resolve_draft(db: AsyncSession, draft: TaskDraft, *, user_id: int) -> ResolvedDraft:
     """Resolve the project, then the assignee, for one user."""
     project = await _resolve_project(db, draft.project_ref, user_id)
-    assignee = await _resolve_assignee(db, draft.assignee_ref, project, user_id)
+    assignee = await resolve_assignee(db, draft.assignee_ref, project, user_id)
     return ResolvedDraft(draft=draft, project=project, assignee=assignee)

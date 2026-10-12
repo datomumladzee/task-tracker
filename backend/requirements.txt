@@ -39,6 +39,10 @@ python-multipart==0.0.20
 # Google's Gemini SDK, used on the free tier. Only core/llm.py imports it, so
 # a different provider can replace it without touching the rest of the app.
 google-genai==2.25.0
+# The timezone database, so "tomorrow" means the user's tomorrow. Python
+# reads it from the OS when present; pinning it here means it works even on a
+# base image that ships without one.
+tzdata==2026.5
 
 # Testing
 # In the same file as the app dependencies because there is one image and one
