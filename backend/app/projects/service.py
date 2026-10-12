@@ -1,10 +1,11 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.core.unset import UNSET, Unset
 from app.projects.models import Project, ProjectMember, ProjectRole
+from app.users.models import User
 from app.users.service import get_user_by_email
 
 # The week 2 rule applies here: plain arguments in, plain objects out. No
@@ -272,3 +273,79 @@ async def _count_admins_locked(db: AsyncSession, project_id: int) -> int:
         .with_for_update()
     )
     return len(result.all())
+
+
+# ---------------------------------------------------------------------------
+# lookups by name, for the intake resolver
+# ---------------------------------------------------------------------------
+#
+# Both return a list rather than one row, because the number of matches is
+# the answer: one is resolved, several is ambiguous, none is unknown.
+#
+# Matching runs in tiers, and the first tier with any match wins. So "auth"
+# matches a project called exactly "Auth" and stops there, rather than also
+# matching "Auth API" and turning a clear answer into an ambiguous one.
+#
+# autoescape on every LIKE, because the text comes from a user via the model.
+# Without it "%" would match every project and "_" any single character.
+
+
+async def find_projects_by_name(db: AsyncSession, user_id: int, name: str) -> list[Project]:
+    """Projects the user belongs to whose name matches, case-insensitive.
+
+    Scoped through project_members, so a project the user cannot see is never
+    returned, however well its name matches.
+    """
+    wanted = " ".join(name.split()).lower()
+    if not wanted:
+        return []
+
+    visible = (
+        select(Project)
+        .join(ProjectMember, ProjectMember.project_id == Project.id)
+        .where(ProjectMember.user_id == user_id)
+        .order_by(Project.name, Project.id)
+    )
+
+    # Uses ix_projects_lower_name from the week 2 migration.
+    exact = await db.execute(visible.where(func.lower(Project.name) == wanted))
+    found = list(exact.scalars().all())
+    if found:
+        return found
+
+    partial = await db.execute(
+        visible.where(func.lower(Project.name).contains(wanted, autoescape=True))
+    )
+    return list(partial.scalars().all())
+
+
+async def find_members_by_reference(db: AsyncSession, project_id: int, ref: str) -> list[User]:
+    """Active members of a project matching an email, a full name or a first name.
+
+    Tried in that order: an email is unambiguous, a full name nearly so, a
+    first name often is not. "Anna" matches "Anna Smith" but not "Annabel".
+    Inactive accounts are left out, since a task assigned to someone who
+    cannot log in will never get done.
+    """
+    wanted = " ".join(ref.split()).lower()
+    if not wanted:
+        return []
+
+    members = (
+        select(User)
+        .join(ProjectMember, ProjectMember.user_id == User.id)
+        .where(ProjectMember.project_id == project_id, User.is_active.is_(True))
+        .order_by(User.full_name, User.id)
+    )
+
+    tiers = (
+        func.lower(User.email) == wanted,
+        func.lower(User.full_name) == wanted,
+        func.lower(User.full_name).startswith(wanted + " ", autoescape=True),
+    )
+    for condition in tiers:
+        result = await db.execute(members.where(condition))
+        found = list(result.scalars().all())
+        if found:
+            return found
+    return []

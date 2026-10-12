@@ -180,3 +180,27 @@ def test_nulls_are_allowed_for_everything_but_title():
             title="", description=None, due_date=None, priority=None,
             status=None, project_ref=None, assignee_ref=None,
         )
+
+
+# ---------------------------------------------------------------------------
+# grounding in the user's projects
+# ---------------------------------------------------------------------------
+
+
+def test_project_names_are_listed_in_their_own_block():
+    prompt = parser.build_prompt("x", today=FRIDAY, project_names=["Auth API", "Mobile"])
+
+    assert "<projects>\n- Auth API\n- Mobile\n</projects>" in prompt
+    # Before today and the message, so it sits in the more stable part.
+    assert prompt.index("<projects>") < prompt.index("Today is") < prompt.index("<message>")
+
+
+def test_no_projects_means_no_block():
+    assert "<projects>" not in parser.build_prompt("x", today=FRIDAY)
+
+
+async def test_parse_task_passes_project_names_through(fake_generate):
+    await parser.parse_task("x", today=FRIDAY, project_names=["Billing"])
+
+    [call] = fake_generate["calls"]
+    assert "- Billing" in call["prompt"]
