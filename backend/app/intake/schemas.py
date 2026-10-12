@@ -45,7 +45,8 @@ class TaskDraft(BaseModel):
     )
     project_ref: str | None = Field(
         description="The project name as the user said it, without words like "
-        "'the' or 'project'. Null if no project was mentioned. Never invent one.",
+        "'the' or 'project'. If a word matches part of several project names, give "
+        "that word. Null only if nothing in the message names a project. Never invent one.",
     )
     assignee_ref: str | None = Field(
         description="Who the task is for, as the user said it: 'me', a name, or an "

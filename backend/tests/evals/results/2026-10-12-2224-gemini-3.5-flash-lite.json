@@ -1,0 +1,446 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "run_at": "2026-10-12T22:24:05.418122+00:00",
+  "today": "2026-10-14",
+  "passed": 25,
+  "total": 25,
+  "errors": 0,
+  "by_field": {
+    "title": [
+      8,
+      8
+    ],
+    "due_date": [
+      11,
+      11
+    ],
+    "priority": [
+      6,
+      6
+    ],
+    "project": [
+      24,
+      24
+    ],
+    "assignee": [
+      14,
+      14
+    ],
+    "status": [
+      2,
+      2
+    ]
+  },
+  "cases": [
+    {
+      "id": "everything-stated",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "ship auth docs"
+        },
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-16"
+        },
+        "priority": {
+          "ok": true,
+          "got": "high"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth Docs"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved dato@example.com"
+        }
+      }
+    },
+    {
+      "id": "teammate-by-first-name",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "fix the crash in the mobile app"
+        },
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-15"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved giorgi@example.com"
+        }
+      }
+    },
+    {
+      "id": "full-name",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "Review the auth api PR"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth API"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved giorgi@example.com"
+        }
+      }
+    },
+    {
+      "id": "terse-format",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "proofread the intro"
+        },
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-15"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth Docs"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved dato@example.com"
+        }
+      }
+    },
+    {
+      "id": "absolute-date",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-30"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth API"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved giorgi@example.com"
+        }
+      }
+    },
+    {
+      "id": "tonight-is-today",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-14"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Website"
+        }
+      }
+    },
+    {
+      "id": "next-monday",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-19"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Billing"
+        }
+      }
+    },
+    {
+      "id": "end-of-next-week",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-23"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        }
+      }
+    },
+    {
+      "id": "no-date-means-null",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": null
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        }
+      }
+    },
+    {
+      "id": "urgent-means-high",
+      "passed": true,
+      "checks": {
+        "priority": {
+          "ok": true,
+          "got": "high"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Website"
+        }
+      }
+    },
+    {
+      "id": "low-priority-prefix",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "tidy up the readme"
+        },
+        "priority": {
+          "ok": true,
+          "got": "low"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth API"
+        }
+      }
+    },
+    {
+      "id": "explicit-medium",
+      "passed": true,
+      "checks": {
+        "priority": {
+          "ok": true,
+          "got": "medium"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved anna@example.com"
+        }
+      }
+    },
+    {
+      "id": "already-in-progress",
+      "passed": true,
+      "checks": {
+        "status": {
+          "ok": true,
+          "got": "in_progress"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        }
+      }
+    },
+    {
+      "id": "unstated-priority-stays-null",
+      "passed": true,
+      "checks": {
+        "priority": {
+          "ok": true,
+          "got": null
+        },
+        "status": {
+          "ok": true,
+          "got": null
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Billing"
+        }
+      }
+    },
+    {
+      "id": "anna-depends-on-the-project",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-15"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Billing"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved anna.b@example.com"
+        }
+      }
+    },
+    {
+      "id": "anna-in-another-project",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved anna@example.com"
+        }
+      }
+    },
+    {
+      "id": "nobody-by-that-name",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "resolved Website"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "unknown"
+        }
+      }
+    },
+    {
+      "id": "real-person-wrong-project",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "resolved Billing"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "unknown"
+        }
+      }
+    },
+    {
+      "id": "email-of-a-non-member",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "resolved Auth API"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "unknown"
+        }
+      }
+    },
+    {
+      "id": "two-auth-projects",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-19"
+        },
+        "project": {
+          "ok": true,
+          "got": "ambiguous ['Auth API', 'Auth Docs']"
+        }
+      }
+    },
+    {
+      "id": "project-that-does-not-exist",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "unknown ['Website', 'Billing', 'Auth Docs', 'Auth API', 'Mobile App']"
+        }
+      }
+    },
+    {
+      "id": "no-project-mentioned",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "plan the launch party"
+        },
+        "due_date": {
+          "ok": true,
+          "got": null
+        },
+        "priority": {
+          "ok": true,
+          "got": null
+        },
+        "project": {
+          "ok": true,
+          "got": "unknown ['Website', 'Billing', 'Auth Docs', 'Auth API', 'Mobile App']"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "not_given"
+        }
+      }
+    },
+    {
+      "id": "barely-a-sentence",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "fix bug"
+        },
+        "project": {
+          "ok": true,
+          "got": "unknown ['Website', 'Billing', 'Auth Docs', 'Auth API', 'Mobile App']"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "not_given"
+        }
+      }
+    },
+    {
+      "id": "prompt-injection",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "clean the kitchen"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "not_given"
+        }
+      }
+    },
+    {
+      "id": "invented-project-name",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "unknown"
+        }
+      }
+    }
+  ]
+}
