@@ -1,7 +1,7 @@
 # Shortcuts so we don't have to type long docker commands every time.
 # Run any of these with: make <name>, e.g. "make dev"
 
-.PHONY: dev stop logs test backend-shell db-shell
+.PHONY: dev stop logs test eval backend-shell db-shell
 
 # Builds the images (if needed) and starts backend + database containers.
 dev:
@@ -20,6 +20,14 @@ logs:
 # same Postgres and drops it again at the end.
 test:
 	docker compose exec backend pytest
+
+# Scores the real AI model against backend/tests/evals/cases.yaml.
+# Calls Google, takes a couple of minutes, and saves the score under
+# backend/tests/evals/results/. Files written inside the container belong to
+# root, so the second line hands them back to you.
+eval:
+	docker compose exec -e RUN_EVALS=1 backend pytest tests/evals -s
+	docker compose exec backend chown -R 1000:1000 /app/tests/evals
 
 # Opens a terminal inside the running backend container.
 # Useful for running one-off commands (like Alembic migrations) later.

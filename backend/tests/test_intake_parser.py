@@ -100,6 +100,13 @@ async def test_function_calling_stays_off_for_structured_calls(fake_generate):
     assert call["config"].automatic_function_calling.disable is True
 
 
+async def test_structured_calls_use_temperature_zero(fake_generate):
+    await parser.parse_task("ship docs", today=FRIDAY)
+
+    [call] = fake_generate["calls"]
+    assert call["config"].temperature == 0
+
+
 # ---------------------------------------------------------------------------
 # what comes back
 # ---------------------------------------------------------------------------

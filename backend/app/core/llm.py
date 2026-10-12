@@ -198,6 +198,10 @@ async def complete_structured(
         _base_config(
             response_mime_type="application/json",
             response_json_schema=schema.model_json_schema(),
+            # Extraction has one right answer, so no creativity wanted. 0 makes
+            # replies as repeatable as the model allows, which is also what
+            # makes eval scores comparable from one run to the next.
+            temperature=0,
         ),
     )
 
