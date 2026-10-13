@@ -62,7 +62,15 @@ class LLMUnavailable(LLMError):
 
     The caller should answer 503 and keep the user's text, so nothing they
     typed is lost.
+
+    retryable says whether another model could plausibly succeed. A 503 or a
+    timeout might be this model alone. A 400 or 403 is our request or our key,
+    and every model would refuse it the same way.
     """
+
+    def __init__(self, message: str, *, retryable: bool = True):
+        super().__init__(message)
+        self.retryable = retryable
 
 
 # ---------------------------------------------------------------------------
@@ -82,6 +90,9 @@ class LLMResult:
     input_tokens: int
     output_tokens: int
     latency_ms: int
+    # Which model actually answered. With fallbacks this is not always the
+    # one configured first, and an answer is only explainable if you know.
+    model: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -113,8 +124,21 @@ def _get_client() -> genai.Client:
     return _client
 
 
-async def _generate(prompt: str, config: types.GenerateContentConfig) -> LLMResult:
-    """The one place a request is sent, timed, measured and logged.
+def _is_retryable(code: int | None) -> bool:
+    """Whether a different model might succeed where this one failed.
+
+    Only an authentication failure is the same for every model: a missing,
+    wrong or forbidden key. Everything else can be specific to one model. A
+    404 means that model was retired or never offered on this key, a 400 can
+    mean one model rejects a setting another accepts, and a 5xx is that model
+    being busy. Found by probing: two models on the fallback list returned 404,
+    which an "any 4xx is our fault" rule would have treated as fatal.
+    """
+    return code not in (401, 403)
+
+
+async def _call_once(model: str, prompt: str, config: types.GenerateContentConfig) -> LLMResult:
+    """One request to one model: sent, timed, measured, logged.
 
     Uses models.generate_content rather than the newer interactions API shown
     in Google's quickstart. Both work, but interactions raises its errors from
@@ -126,18 +150,18 @@ async def _generate(prompt: str, config: types.GenerateContentConfig) -> LLMResu
 
     try:
         response = await client.aio.models.generate_content(
-            model=settings.gemini_model,
+            model=model,
             contents=prompt,
             config=config,
         )
     except errors.APIError as e:
         # 429 is the free tier's per-minute or per-day cap.
         if e.code == 429:
-            raise LLMRateLimited(str(e)) from e
-        raise LLMUnavailable(f"provider returned {e.code}: {e}") from e
+            raise LLMRateLimited(f"{model}: {e}") from e
+        raise LLMUnavailable(f"{model} returned {e.code}", retryable=_is_retryable(e.code)) from e
     except (httpx.TimeoutException, httpx.TransportError) as e:
         # A timeout or a dropped connection. The SDK does not wrap these.
-        raise LLMUnavailable(f"network error: {type(e).__name__}") from e
+        raise LLMUnavailable(f"{model}: network error {type(e).__name__}") from e
 
     latency_ms = int((time.perf_counter() - started) * 1000)
 
@@ -154,7 +178,7 @@ async def _generate(prompt: str, config: types.GenerateContentConfig) -> LLMResu
     # Never log the prompt or the reply. Only the measurements.
     logger.info(
         "llm call model=%s input_tokens=%d output_tokens=%d latency_ms=%d",
-        settings.gemini_model,
+        model,
         input_tokens,
         output_tokens,
         latency_ms,
@@ -165,7 +189,47 @@ async def _generate(prompt: str, config: types.GenerateContentConfig) -> LLMResu
         input_tokens=input_tokens,
         output_tokens=output_tokens,
         latency_ms=latency_ms,
+        model=model,
     )
+
+
+async def _generate(prompt: str, config: types.GenerateContentConfig) -> LLMResult:
+    """Try the main model, then each fallback, until one answers.
+
+    Moves on for anything another model might not share: busy, timed out,
+    retired, or rate limited, since free-tier limits are counted per model. An
+    authentication failure stops at once, because every model would refuse the
+    same key and trying them all only makes the user wait.
+
+    If every model fails, the error raised says rate limited only when all of
+    them were, so the caller's "try again in 30 seconds" is honest.
+    """
+    models = settings.llm_models
+    rate_limited = 0
+    last_error: LLMError | None = None
+
+    for i, model in enumerate(models):
+        try:
+            return await _call_once(model, prompt, config)
+        except LLMRateLimited as e:
+            rate_limited += 1
+            last_error = e
+        except LLMUnavailable as e:
+            if not e.retryable:
+                raise
+            last_error = e
+
+        if i + 1 < len(models):
+            logger.warning(
+                "llm fallback from=%s to=%s reason=%s",
+                model,
+                models[i + 1],
+                type(last_error).__name__,
+            )
+
+    if rate_limited == len(models):
+        raise LLMRateLimited(f"all {len(models)} models rate limited") from last_error
+    raise LLMUnavailable(f"all {len(models)} models failed") from last_error
 
 
 def _base_config(**extra) -> types.GenerateContentConfig:

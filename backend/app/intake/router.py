@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import llm
+from app.core.config import settings
 from app.core.db import get_db
+from app.core.ratelimit import RateLimiter
 from app.core.deps import get_current_user
 from app.intake import parser, service
 from app.intake.resolver import resolve_draft
@@ -14,6 +16,9 @@ from app.tasks.service import AssigneeNotMember
 from app.users.models import User
 
 router = APIRouter(prefix="/intake", tags=["intake"])
+
+# Per user, per process. See core/ratelimit.py for why that is fine locally.
+parse_limiter = RateLimiter(limit=settings.intake_parse_limit_per_minute, window_seconds=60)
 
 
 def _ai_failed(code: int, message: str, text: str, headers: dict | None = None) -> HTTPException:
@@ -36,6 +41,18 @@ async def parse(
     db: AsyncSession = Depends(get_db),
 ) -> ParseResponse:
     """A sentence in, a draft out. Nothing becomes a task until confirm."""
+    # Before the model is called, so a refused request costs no quota.
+    # Every attempt counts, including ones where the AI then fails, because
+    # those spend quota too.
+    wait = parse_limiter.hit(user.id)
+    if wait is not None:
+        raise _ai_failed(
+            429,
+            f"You are sending requests too quickly, try again in {wait} seconds",
+            data.text,
+            headers={"Retry-After": str(wait)},
+        )
+
     project_names = [p.name for p, _role in await list_projects_for_user(db, user.id)]
 
     # The user's today, not the server's. See parser.today_in.

@@ -83,7 +83,7 @@ async def _seed(db, spec) -> dict:
 # ---------------------------------------------------------------------------
 
 
-async def _parse_with_retry(text, *, today, project_names) -> TaskDraft:
+async def _parse_with_retry(text, *, today, project_names) -> tuple[TaskDraft, llm.LLMResult]:
     """Retry a busy or rate-limited model a couple of times before giving up.
 
     The free tier answers 503 under load and 429 when the per-minute cap is
@@ -94,8 +94,7 @@ async def _parse_with_retry(text, *, today, project_names) -> TaskDraft:
         if wait:
             await asyncio.sleep(wait)
         try:
-            draft, _ = await parse_task(text, today=today, project_names=project_names)
-            return draft
+            return await parse_task(text, today=today, project_names=project_names)
         except (llm.LLMRateLimited, llm.LLMUnavailable):
             if attempt == 2:
                 raise
@@ -169,7 +168,7 @@ async def test_evals(db):
         if i:
             await asyncio.sleep(PAUSE)
         try:
-            draft = await _parse_with_retry(case["text"], today=today, project_names=names)
+            draft, usage = await _parse_with_retry(case["text"], today=today, project_names=names)
         except llm.LLMError as e:
             rows.append({"id": case["id"], "passed": False, "error": type(e).__name__, "checks": {}})
             continue
@@ -183,6 +182,10 @@ async def test_evals(db):
             "id": case["id"],
             "passed": all(ok for ok, _ in checks.values()),
             "checks": {f: {"ok": ok, "got": got} for f, (ok, got) in checks.items()},
+            "model": usage.model,
+            "input_tokens": usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+            "latency_ms": usage.latency_ms,
         })
 
     passed = sum(r["passed"] for r in rows)
@@ -200,6 +203,30 @@ async def test_evals(db):
             print(f"  {field:10} {by_field[field]:>3}/{by_field_total[field]}")
     print(f"  {'-' * 18}\n  {'all right':10} {passed:>3}/{len(rows)}" + (f"   ({errors} errors)" if errors else ""))
 
+    # --- what a request costs ------------------------------------------------
+    # The free tier has no bill, so these stand in for the plan's "cost per
+    # request". Latency is the successful call only, not time spent retrying.
+    measured = [r for r in rows if "latency_ms" in r]
+    usage_summary = {}
+    if measured:
+        latencies = sorted(r["latency_ms"] for r in measured)
+        usage_summary = {
+            "avg_input_tokens": round(sum(r["input_tokens"] for r in measured) / len(measured)),
+            "avg_output_tokens": round(sum(r["output_tokens"] for r in measured) / len(measured)),
+            "median_latency_ms": latencies[len(latencies) // 2],
+            "max_latency_ms": latencies[-1],
+            "answered_by": dict(Counter(r["model"] for r in measured)),
+        }
+        print(
+            f"\n  tokens   {usage_summary['avg_input_tokens']} in, "
+            f"{usage_summary['avg_output_tokens']} out, on average"
+        )
+        print(
+            f"  latency  {usage_summary['median_latency_ms']} ms median, "
+            f"{usage_summary['max_latency_ms']} ms slowest"
+        )
+        print(f"  models   {usage_summary['answered_by']}")
+
     RESULTS.mkdir(exist_ok=True)
     out = RESULTS / f"{started:%Y-%m-%d-%H%M}-{settings.gemini_model}.json"
     out.write_text(json.dumps({
@@ -210,6 +237,7 @@ async def test_evals(db):
         "total": len(rows),
         "errors": errors,
         "by_field": {f: [by_field[f], by_field_total[f]] for f in by_field_total},
+        "usage": usage_summary,
         "cases": rows,
     }, indent=2, default=str) + "\n")
     print(f"\n  saved {out.relative_to(HERE.parent.parent)}")

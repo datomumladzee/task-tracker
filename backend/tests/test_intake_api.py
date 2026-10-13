@@ -14,6 +14,7 @@ from sqlalchemy import select, update
 
 from app.core import llm
 from app.intake import parser
+from app.intake.router import parse_limiter
 from app.intake.models import IntakeDraft
 from app.intake.schemas import TaskDraft
 
@@ -25,6 +26,15 @@ def _draft(**overrides) -> TaskDraft:
     )
     fields.update(overrides)
     return TaskDraft.model_validate(fields)
+
+
+@pytest.fixture(autouse=True)
+def fresh_rate_limit():
+    """The limiter lives in the router module and outlives a single test, so
+    every test starts with nobody having used any of their allowance."""
+    parse_limiter.clear()
+    yield
+    parse_limiter.clear()
 
 
 @pytest.fixture
@@ -356,4 +366,40 @@ async def test_an_unknown_timezone_is_rejected_before_the_model(client: AsyncCli
 
     assert response.status_code == 422
     assert model.calls == []
+
+
+# ---------------------------------------------------------------------------
+# the per-user limit
+# ---------------------------------------------------------------------------
+
+
+async def test_the_eleventh_parse_in_a_minute_is_refused(client: AsyncClient, team, model):
+    for _ in range(10):
+        assert (await _parse(client, team)).status_code == 201
+
+    response = await _parse(client, team, text="one too many")
+
+    assert response.status_code == 429
+    assert int(response.headers["retry-after"]) >= 1
+    assert response.json()["detail"]["text"] == "one too many"
+    # Refused before the model, so no quota was spent on it.
+    assert len(model.calls) == 10
+
+
+async def test_one_user_hitting_the_limit_does_not_block_another(client: AsyncClient, team, model):
+    for _ in range(10):
+        await _parse(client, team, who="me")
+
+    assert (await _parse(client, team, who="me")).status_code == 429
+    assert (await _parse(client, team, who="viewer")).status_code == 201
+
+
+async def test_failed_ai_calls_still_count(client: AsyncClient, team, model):
+    """They spent quota too."""
+    model.next = llm.LLMUnavailable("down")
+    for _ in range(10):
+        await _parse(client, team)
+
+    model.next = _draft()
+    assert (await _parse(client, team)).status_code == 429
 

@@ -1,0 +1,555 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "run_at": "2026-10-13T20:05:43.426421+00:00",
+  "today": "2026-10-14",
+  "passed": 25,
+  "total": 25,
+  "errors": 0,
+  "by_field": {
+    "title": [
+      8,
+      8
+    ],
+    "due_date": [
+      11,
+      11
+    ],
+    "priority": [
+      6,
+      6
+    ],
+    "project": [
+      24,
+      24
+    ],
+    "assignee": [
+      14,
+      14
+    ],
+    "status": [
+      2,
+      2
+    ]
+  },
+  "usage": {
+    "avg_input_tokens": 283,
+    "avg_output_tokens": 68,
+    "median_latency_ms": 890,
+    "max_latency_ms": 1822,
+    "answered_by": {
+      "gemini-3.5-flash-lite": 25
+    }
+  },
+  "cases": [
+    {
+      "id": "everything-stated",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "ship auth docs"
+        },
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-16"
+        },
+        "priority": {
+          "ok": true,
+          "got": "high"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth Docs"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved dato@example.com"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 285,
+      "output_tokens": 76,
+      "latency_ms": 1738
+    },
+    {
+      "id": "teammate-by-first-name",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "fix the crash in the mobile app"
+        },
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-15"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved giorgi@example.com"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 287,
+      "output_tokens": 81,
+      "latency_ms": 960
+    },
+    {
+      "id": "full-name",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "review the auth api PR"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth API"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved giorgi@example.com"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 283,
+      "output_tokens": 70,
+      "latency_ms": 792
+    },
+    {
+      "id": "terse-format",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "Proofread the intro"
+        },
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-15"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth Docs"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved dato@example.com"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 284,
+      "output_tokens": 76,
+      "latency_ms": 1135
+    },
+    {
+      "id": "absolute-date",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-30"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth API"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved giorgi@example.com"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 298,
+      "output_tokens": 79,
+      "latency_ms": 811
+    },
+    {
+      "id": "tonight-is-today",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-14"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Website"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 279,
+      "output_tokens": 74,
+      "latency_ms": 844
+    },
+    {
+      "id": "next-monday",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-19"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Billing"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 281,
+      "output_tokens": 73,
+      "latency_ms": 1822
+    },
+    {
+      "id": "end-of-next-week",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-23"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 285,
+      "output_tokens": 73,
+      "latency_ms": 1393
+    },
+    {
+      "id": "no-date-means-null",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": null
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 280,
+      "output_tokens": 63,
+      "latency_ms": 898
+    },
+    {
+      "id": "urgent-means-high",
+      "passed": true,
+      "checks": {
+        "priority": {
+          "ok": true,
+          "got": "high"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Website"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 285,
+      "output_tokens": 64,
+      "latency_ms": 791
+    },
+    {
+      "id": "low-priority-prefix",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "tidy up the readme"
+        },
+        "priority": {
+          "ok": true,
+          "got": "low"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Auth API"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 283,
+      "output_tokens": 65,
+      "latency_ms": 706
+    },
+    {
+      "id": "explicit-medium",
+      "passed": true,
+      "checks": {
+        "priority": {
+          "ok": true,
+          "got": "medium"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved anna@example.com"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 286,
+      "output_tokens": 48,
+      "latency_ms": 753
+    },
+    {
+      "id": "already-in-progress",
+      "passed": true,
+      "checks": {
+        "status": {
+          "ok": true,
+          "got": "in_progress"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 283,
+      "output_tokens": 65,
+      "latency_ms": 890
+    },
+    {
+      "id": "unstated-priority-stays-null",
+      "passed": true,
+      "checks": {
+        "priority": {
+          "ok": true,
+          "got": null
+        },
+        "status": {
+          "ok": true,
+          "got": null
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Billing"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 278,
+      "output_tokens": 62,
+      "latency_ms": 911
+    },
+    {
+      "id": "anna-depends-on-the-project",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-15"
+        },
+        "project": {
+          "ok": true,
+          "got": "resolved Billing"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved anna.b@example.com"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 282,
+      "output_tokens": 75,
+      "latency_ms": 813
+    },
+    {
+      "id": "anna-in-another-project",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "resolved Mobile App"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "resolved anna@example.com"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 284,
+      "output_tokens": 66,
+      "latency_ms": 1083
+    },
+    {
+      "id": "nobody-by-that-name",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "resolved Website"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "unknown"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 281,
+      "output_tokens": 66,
+      "latency_ms": 720
+    },
+    {
+      "id": "real-person-wrong-project",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "resolved Billing"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "unknown"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 280,
+      "output_tokens": 75,
+      "latency_ms": 959
+    },
+    {
+      "id": "email-of-a-non-member",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "resolved Auth API"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "unknown"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 287,
+      "output_tokens": 69,
+      "latency_ms": 1220
+    },
+    {
+      "id": "two-auth-projects",
+      "passed": true,
+      "checks": {
+        "due_date": {
+          "ok": true,
+          "got": "2026-10-19"
+        },
+        "project": {
+          "ok": true,
+          "got": "ambiguous ['Auth API', 'Auth Docs']"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 277,
+      "output_tokens": 71,
+      "latency_ms": 900
+    },
+    {
+      "id": "project-that-does-not-exist",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "unknown ['Website', 'Billing', 'Auth Docs', 'Auth API', 'Mobile App']"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 277,
+      "output_tokens": 62,
+      "latency_ms": 680
+    },
+    {
+      "id": "no-project-mentioned",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "plan the launch party"
+        },
+        "due_date": {
+          "ok": true,
+          "got": null
+        },
+        "priority": {
+          "ok": true,
+          "got": null
+        },
+        "project": {
+          "ok": true,
+          "got": "unknown ['Website', 'Billing', 'Auth Docs', 'Auth API', 'Mobile App']"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "not_given"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 277,
+      "output_tokens": 62,
+      "latency_ms": 778
+    },
+    {
+      "id": "barely-a-sentence",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "fix bug"
+        },
+        "project": {
+          "ok": true,
+          "got": "unknown ['Website', 'Billing', 'Auth Docs', 'Auth API', 'Mobile App']"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "not_given"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 275,
+      "output_tokens": 60,
+      "latency_ms": 1273
+    },
+    {
+      "id": "prompt-injection",
+      "passed": true,
+      "checks": {
+        "title": {
+          "ok": true,
+          "got": "clean the kitchen"
+        },
+        "assignee": {
+          "ok": true,
+          "got": "not_given"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 289,
+      "output_tokens": 61,
+      "latency_ms": 813
+    },
+    {
+      "id": "invented-project-name",
+      "passed": true,
+      "checks": {
+        "project": {
+          "ok": true,
+          "got": "unknown"
+        }
+      },
+      "model": "gemini-3.5-flash-lite",
+      "input_tokens": 283,
+      "output_tokens": 63,
+      "latency_ms": 795
+    }
+  ]
+}
