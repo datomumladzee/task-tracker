@@ -23,8 +23,8 @@ export function NewProjectForm({ onCreated }: { onCreated: () => void }) {
       await createProject({ name, description: description.trim() || null });
       setName("");
       setDescription("");
-      // Reload the list rather than inserting the reply: the reply is a
-      // ProjectRead with no role, and the list needs one.
+      // Reload the list rather than inserting the reply, so the order and
+      // every role come from the one endpoint the page already trusts.
       onCreated();
     } catch (err) {
       setError(errorMessage(err));

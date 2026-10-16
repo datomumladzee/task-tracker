@@ -33,16 +33,21 @@ admin = require_project_role(ProjectRole.ADMIN)
 # ---------------------------------------------------------------------------
 
 
-@router.post("", response_model=ProjectRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ProjectListItem, status_code=status.HTTP_201_CREATED)
 async def create_project(
     data: ProjectCreate,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> Project:
-    """Any logged-in user can create a project, and becomes its admin."""
-    return await service.create_project(
+) -> ProjectListItem:
+    """Any logged-in user can create a project, and becomes its admin.
+
+    Returns the same shape as the list, role included, so a client never has
+    to fetch the list again to learn what it can do with what it just made.
+    """
+    project = await service.create_project(
         db, user_id=user.id, name=data.name, description=data.description
     )
+    return ProjectListItem(**ProjectRead.model_validate(project).model_dump(), role=ProjectRole.ADMIN)
 
 
 @router.get("", response_model=list[ProjectListItem])
@@ -58,10 +63,12 @@ async def list_projects(
     ]
 
 
-@router.get("/{project_id}", response_model=ProjectRead)
-async def get_project(member: ProjectMember = Depends(viewer)) -> Project:
-    # The dependency already loaded the project with the membership.
-    return member.project
+@router.get("/{project_id}", response_model=ProjectListItem)
+async def get_project(member: ProjectMember = Depends(viewer)) -> ProjectListItem:
+    # The dependency already loaded the project with the membership, so the
+    # caller's role comes for free. Non-members never get here: the
+    # dependency answers 404 first.
+    return ProjectListItem(**ProjectRead.model_validate(member.project).model_dump(), role=member.role)
 
 
 @router.patch("/{project_id}", response_model=ProjectRead)

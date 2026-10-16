@@ -45,9 +45,9 @@ export const me = () => request<User>("GET", "/users/me");
 
 export const listProjects = () => request<Project[]>("GET", "/projects");
 
-// Returns ProjectRead, which has no role. The creator is always its admin.
+// Returns the new project with role "admin", the same shape as the list.
 export const createProject = (body: { name: string; description?: string | null }) =>
-  request<Omit<Project, "role">>("POST", "/projects", { body });
+  request<Project>("POST", "/projects", { body });
 
 export const listMembers = (projectId: number) =>
   request<Member[]>("GET", `/projects/${projectId}/members`);

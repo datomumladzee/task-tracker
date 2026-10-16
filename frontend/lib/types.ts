@@ -32,6 +32,7 @@ export type LoginResponse = {
 export type TotpSetupResponse = { provisioning_uri: string; secret: string };
 
 // projects/schemas.py ProjectListItem: a project plus the caller's role.
+// Returned by GET /projects, GET /projects/{id} and POST /projects.
 export type Project = {
   id: number;
   name: string;

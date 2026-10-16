@@ -261,3 +261,25 @@ async def test_a_refused_last_admin_removal_touches_no_task(client: AsyncClient,
     assert response.status_code == 409
 
     assert (await _get_task(client, team, team.pid, task["id"]))["assignee"]["id"] == team.ids["admin"]
+
+
+# ---------------------------------------------------------------------------
+# your role on one project
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("who", ["admin", "standard", "viewer"])
+async def test_get_one_project_includes_your_role(client: AsyncClient, team, who):
+    response = await client.get(f"/projects/{team.pid}", headers=team.h[who])
+
+    assert response.status_code == 200
+    assert response.json()["role"] == who
+
+
+async def test_creating_a_project_returns_role_admin(client: AsyncClient, auth_headers):
+    headers = await auth_headers("maker@example.com")
+
+    response = await client.post("/projects", json={"name": "Mine"}, headers=headers)
+
+    assert response.status_code == 201
+    assert response.json()["role"] == "admin"
