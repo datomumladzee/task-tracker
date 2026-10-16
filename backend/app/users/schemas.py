@@ -30,10 +30,11 @@ class UserCreate(BaseModel):
 
 
 class UserRead(BaseModel):
-    """What any endpoint is allowed to say about a user.
+    """The caller's own account: register, /users/me and /auth/2fa/verify.
 
     Used as response_model, so FastAPI drops every field not listed here.
-    hashed_password is absent on purpose and must stay absent.
+    hashed_password and totp_secret are absent on purpose and must stay
+    absent. Other people are shown as UserSummary, never as this.
     """
 
     id: int
@@ -42,6 +43,9 @@ class UserRead(BaseModel):
     role: UserRole
     is_active: bool
     created_at: datetime
+    # Whether 2FA is on, so the settings page can show it and skip offering
+    # a setup that would answer 409. Only ever about yourself.
+    totp_enabled: bool
 
     # Pydantic reads dictionaries by default. The service layer returns a User
     # object, where the values live in attributes instead. This flag is what

@@ -130,7 +130,7 @@ async def totp_verify(
     """Confirm the first code and enable 2FA.
 
     Proves the app was actually paired before the account starts depending on
-    it. Returns the updated user so a client can see totp_enabled flip.
+    it. Returns the updated user, so a client sees totp_enabled turn true.
     """
     try:
         ok = await service.confirm_totp_setup(db, user, data.code)

@@ -238,3 +238,61 @@ async def test_second_step_rejects_an_expired_pending_token(
     )
 
     assert response.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# totp_enabled on your own account, totp_secret nowhere
+# ---------------------------------------------------------------------------
+
+
+async def test_a_new_user_has_2fa_off(client: AsyncClient, register, auth_headers):
+    assert (await register("fresh@example.com")).json()["totp_enabled"] is False
+
+    headers = await auth_headers("fresh2@example.com")
+    assert (await client.get("/users/me", headers=headers)).json()["totp_enabled"] is False
+
+
+async def test_verify_returns_the_user_with_2fa_on(client: AsyncClient, auth_headers):
+    headers = await auth_headers("flip@example.com")
+    secret = (await client.post("/auth/2fa/setup", headers=headers)).json()["secret"]
+
+    response = await client.post("/auth/2fa/verify", headers=headers, json={"code": _code(secret)})
+
+    assert response.json()["totp_enabled"] is True
+    assert (await client.get("/users/me", headers=headers)).json()["totp_enabled"] is True
+
+
+async def test_the_secret_is_in_no_response_but_setup(client: AsyncClient, register, enabled_2fa):
+    """Setup is the one place the secret is meant to appear, once, for the
+    QR code. Every user-shaped response must leave it out."""
+    secret = enabled_2fa.secret
+    headers = enabled_2fa.headers
+    other = await register("other@example.com")
+
+    project = (await client.post("/projects", json={"name": "Leak check"}, headers=headers)).json()
+    pid = project["id"]
+    await client.post(f"/projects/{pid}/members", json={"email": "other@example.com"}, headers=headers)
+    me_id = (await client.get("/users/me", headers=headers)).json()["id"]
+    task = (await client.post(f"/projects/{pid}/tasks", json={"title": "t", "assignee_id": me_id}, headers=headers)).json()
+    await client.post(f"/projects/{pid}/tasks/{task['id']}/comments", json={"body": "hi"}, headers=headers)
+    pending = (await client.post(
+        "/auth/login", json={"email": enabled_2fa.email, "password": "hunter2!!"}
+    ))
+
+    replies = [
+        other,
+        pending,
+        await client.get("/users/me", headers=headers),
+        await client.get(f"/projects/{pid}/members", headers=headers),
+        await client.get(f"/projects/{pid}/tasks", headers=headers),
+        await client.get(f"/projects/{pid}/tasks/{task['id']}/comments", headers=headers),
+    ]
+    for reply in replies:
+        assert reply.status_code < 400, reply.text
+        assert "totp_secret" not in reply.text
+        assert secret not in reply.text
+
+    # Other people are UserSummary: whether they use 2FA is not a teammate's
+    # business, so members, assignees and comment authors leave it out.
+    for reply in replies[3:]:
+        assert "totp_enabled" not in reply.text
