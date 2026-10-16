@@ -155,3 +155,17 @@ async def test_deleting_the_task_takes_its_comments(client: AsyncClient, thread)
     await client.delete(f"/projects/{thread.pid}/tasks/{thread.tid}", headers=thread.h["admin"])
 
     assert (await client.get(thread.url, headers=thread.h["admin"])).status_code == 404
+
+
+async def test_a_demoted_author_can_still_delete_their_own(client: AsyncClient, thread):
+    """Deliberate: losing the right to write does not take away the right to
+    remove what you already wrote."""
+    await client.patch(
+        f"/projects/{thread.pid}/members/{thread.ids['standard']}",
+        json={"role": "viewer"},
+        headers=thread.h["admin"],
+    )
+
+    response = await client.delete(f"{thread.url}/{thread.comment['id']}", headers=thread.h["standard"])
+
+    assert response.status_code == 204

@@ -235,6 +235,8 @@ async def delete_comment(
     await _task_or_404(db, member.project_id, task_id)
     comment = await _comment_or_404(db, task_id, comment_id)
 
+    # Deliberately any role for the author, viewer included: someone demoted
+    # after writing can still remove their own words, just not write new ones.
     is_author = comment.author_id == member.user_id
     is_admin = ROLE_RANK[member.role] >= ROLE_RANK[ProjectRole.ADMIN]
     if not (is_author or is_admin):
