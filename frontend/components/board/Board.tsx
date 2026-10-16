@@ -5,10 +5,12 @@ import { STATUSES, type Task } from "@/lib/types";
 
 type Props = {
   tasks: Task[];
+  canMove: boolean;
   onMoved: (task: Task) => void;
+  onOpen: (task: Task) => void;
 };
 
-export function Board({ tasks, onMoved }: Props) {
+export function Board({ tasks, canMove, onMoved, onOpen }: Props) {
   return (
     <div className="grid gap-4 md:grid-cols-4">
       {STATUSES.map((column) => {
@@ -21,8 +23,9 @@ export function Board({ tasks, onMoved }: Props) {
               {column.label}
               <span className="font-normal text-zinc-500">{cards.length}</span>
             </h2>
+            {cards.length === 0 && <p className="py-2 text-center text-xs text-zinc-400">No tasks</p>}
             {cards.map((t) => (
-              <TaskCard key={t.id} task={t} onMoved={onMoved} />
+              <TaskCard key={t.id} task={t} canMove={canMove} onMoved={onMoved} onOpen={onOpen} />
             ))}
           </section>
         );

@@ -6,12 +6,15 @@ import { request } from "./api";
 import type {
   DraftConfirm,
   LoginResponse,
+  Comment,
   Member,
+  ProjectRole,
   ParseResponse,
   Project,
   Task,
   TaskCreate,
   TaskStatus,
+  TaskUpdate,
   TotpSetupResponse,
   User,
 } from "./types";
@@ -49,6 +52,19 @@ export const createProject = (body: { name: string; description?: string | null 
 export const listMembers = (projectId: number) =>
   request<Member[]>("GET", `/projects/${projectId}/members`);
 
+// Admin only. 404 for no active account with that email, 409 if already in.
+export const addMember = (projectId: number, body: { email: string; role: ProjectRole }) =>
+  request<Member>("POST", `/projects/${projectId}/members`, { body });
+
+// Admin only. 409 when it would leave the project with no admin.
+export const changeMemberRole = (projectId: number, userId: number, role: ProjectRole) =>
+  request<Member>("PATCH", `/projects/${projectId}/members/${userId}`, { body: { role } });
+
+// Admin to remove someone else; anyone to remove themselves (leave).
+// 409 when it would remove the last admin.
+export const removeMember = (projectId: number, userId: number) =>
+  request<null>("DELETE", `/projects/${projectId}/members/${userId}`);
+
 // --- tasks ------------------------------------------------------------------
 
 // Already sorted by column, then position, by the backend.
@@ -62,6 +78,25 @@ export const createTask = (projectId: number, body: TaskCreate) =>
 // goes to the bottom of the new column, which is what a dropdown wants.
 export const moveTask = (projectId: number, taskId: number, status: TaskStatus) =>
   request<Task>("POST", `/projects/${projectId}/tasks/${taskId}/move`, { body: { status } });
+
+// Only the keys present are changed. See TaskUpdate in lib/types.ts.
+export const updateTask = (projectId: number, taskId: number, body: TaskUpdate) =>
+  request<Task>("PATCH", `/projects/${projectId}/tasks/${taskId}`, { body });
+
+// Admin only. Takes the task's comments with it.
+export const deleteTask = (projectId: number, taskId: number) =>
+  request<null>("DELETE", `/projects/${projectId}/tasks/${taskId}`);
+
+// --- comments ---------------------------------------------------------------
+
+export const listComments = (projectId: number, taskId: number) =>
+  request<Comment[]>("GET", `/projects/${projectId}/tasks/${taskId}/comments`);
+
+export const createComment = (projectId: number, taskId: number, body: string) =>
+  request<Comment>("POST", `/projects/${projectId}/tasks/${taskId}/comments`, { body: { body } });
+
+export const deleteComment = (projectId: number, taskId: number, commentId: number) =>
+  request<null>("DELETE", `/projects/${projectId}/tasks/${taskId}/comments/${commentId}`);
 
 // --- intake -----------------------------------------------------------------
 

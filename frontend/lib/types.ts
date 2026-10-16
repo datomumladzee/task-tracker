@@ -59,6 +59,27 @@ export type Task = {
   updated_at: string;
 };
 
+// tasks/schemas.py TaskUpdate. A missing key means "leave it alone"; for
+// description, due_date and assignee_id an explicit null means "clear it".
+// title and priority cannot be null. No status: that goes through /move.
+export type TaskUpdate = {
+  title?: string;
+  description?: string | null;
+  priority?: TaskPriority;
+  due_date?: string | null;
+  assignee_id?: number | null;
+};
+
+// tasks/schemas.py CommentRead. author is null once that account is deleted.
+export type Comment = {
+  id: number;
+  task_id: number;
+  author: UserSummary | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type TaskCreate = {
   title: string;
   description?: string | null;
@@ -118,5 +139,7 @@ export const STATUSES: { value: TaskStatus; label: string }[] = [
   { value: "in_review", label: "In review" },
   { value: "done", label: "Done" },
 ];
+
+export const ROLES: ProjectRole[] = ["admin", "standard", "viewer"];
 
 export const PRIORITIES: TaskPriority[] = ["low", "medium", "high"];
