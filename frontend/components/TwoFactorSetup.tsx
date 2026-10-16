@@ -54,8 +54,8 @@ export function TwoFactorSetup({ enabled, onVerified }: Props) {
       setSetup(null);
       onVerified(user);
     } catch (err) {
-      // 401 here means a wrong code, not a dead session. lib/api.ts only logs
-      // out when the backend marks the token itself as rejected.
+      // A wrong code is a 400 with "Invalid code". It never logs anyone
+      // out: lib/api.ts only does that for a 401 marked WWW-Authenticate.
       setError(errorMessage(err));
       setCode("");
     } finally {

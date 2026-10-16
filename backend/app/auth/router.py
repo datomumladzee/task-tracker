@@ -141,8 +141,12 @@ async def totp_verify(
         ) from None
 
     if not ok:
+        # 400, not 401. The caller is logged in; only the code was wrong. A
+        # 401 means "this token is no good", which would tell a client to log
+        # the user out over a typo. /2fa/login keeps 401, because there the
+        # caller is not logged in yet.
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid code",
         )
 

@@ -141,8 +141,8 @@ export async function request<T>(method: string, path: string, options: Options 
 
   if (!response.ok) {
     // The backend marks "this token is no good" (expired, user deleted or
-    // disabled) with WWW-Authenticate: Bearer. Other 401s, like a wrong code
-    // on /auth/2fa/verify, come without it and must not log anyone out.
+    // disabled) with WWW-Authenticate: Bearer. Other 401s, like a wrong
+    // password at login, come without it and must not log anyone out.
     const tokenRejected = response.status === 401 && response.headers.has("WWW-Authenticate");
     if (tokenRejected && current) {
       setToken(null);

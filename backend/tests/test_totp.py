@@ -98,7 +98,9 @@ async def test_setup_refuses_when_2fa_is_already_on(client: AsyncClient, enabled
 # ---------------------------------------------------------------------------
 
 
-async def test_verify_with_a_wrong_code_is_401(client: AsyncClient, auth_headers):
+async def test_verify_with_a_wrong_code_is_400(client: AsyncClient, auth_headers):
+    """400, not 401: the caller is logged in, only the code was wrong. A 401
+    would read as "your session is dead" to any client."""
     headers = await auth_headers("wrong@example.com")
     await client.post("/auth/2fa/setup", headers=headers)
 
@@ -106,7 +108,11 @@ async def test_verify_with_a_wrong_code_is_401(client: AsyncClient, auth_headers
         "/auth/2fa/verify", headers=headers, json={"code": "000000"}
     )
 
-    assert response.status_code == 401
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Invalid code"
+    assert "www-authenticate" not in response.headers
+    # Still logged in.
+    assert (await client.get("/users/me", headers=headers)).status_code == 200
 
 
 async def test_verify_with_the_real_code_enables_2fa(client: AsyncClient, auth_headers, db):
