@@ -52,6 +52,15 @@ def _unprocessable(detail: str) -> HTTPException:
     )
 
 
+def _assignee_refused(e: service.AssigneeNotMember) -> HTTPException:
+    """422 either way: the request is well formed, the person is not usable.
+    Two messages, because "disabled" and "not in this project" have different
+    fixes."""
+    if isinstance(e, service.AssigneeInactive):
+        return _unprocessable("Assignee's account is disabled")
+    return _unprocessable("Assignee is not a member of this project")
+
+
 @router.post("", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
 async def create_task(
     data: TaskCreate,
@@ -65,8 +74,8 @@ async def create_task(
             created_by_id=member.user_id,
             **data.model_dump(),
         )
-    except service.AssigneeNotMember:
-        raise _unprocessable("Assignee is not a member of this project") from None
+    except service.AssigneeNotMember as e:
+        raise _assignee_refused(e) from None
 
 
 @router.get("", response_model=list[TaskRead])
@@ -102,8 +111,8 @@ async def update_task(
     task = await _task_or_404(db, member.project_id, task_id)
     try:
         return await service.update_task(db, task, **data.model_dump(exclude_unset=True))
-    except service.AssigneeNotMember:
-        raise _unprocessable("Assignee is not a member of this project") from None
+    except service.AssigneeNotMember as e:
+        raise _assignee_refused(e) from None
 
 
 @router.post("/{task_id}/move", response_model=TaskRead)

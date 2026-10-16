@@ -12,7 +12,7 @@ from app.intake.schemas import DraftConfirm, ParseRequest, ParseResponse
 from app.projects.service import list_projects_for_user
 from app.tasks.models import Task
 from app.tasks.schemas import TaskRead
-from app.tasks.service import AssigneeNotMember
+from app.tasks.service import AssigneeInactive, AssigneeNotMember
 from app.users.models import User
 
 router = APIRouter(prefix="/intake", tags=["intake"])
@@ -127,6 +127,10 @@ async def confirm(
     except service.RoleTooLow:
         raise HTTPException(
             status.HTTP_403_FORBIDDEN, "Requires the standard role on this project"
+        ) from None
+    except AssigneeInactive:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY, "Assignee's account is disabled"
         ) from None
     except AssigneeNotMember:
         raise HTTPException(

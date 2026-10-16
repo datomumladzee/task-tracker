@@ -186,3 +186,54 @@ async def test_both_anchors_at_once_is_rejected_by_the_schema(client: AsyncClien
         headers=board.h["admin"],
     )
     assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# only an active member can be assigned
+# ---------------------------------------------------------------------------
+
+
+async def _disable(db, email: str) -> None:
+    from sqlalchemy import update
+
+    from app.users.models import User
+
+    await db.execute(update(User).where(User.email == email).values(is_active=False))
+    await db.commit()
+
+
+async def test_assigning_a_disabled_member_on_create_is_422(client: AsyncClient, board, db):
+    await _disable(db, "standard@example.com")
+
+    response = await client.post(
+        board.url, json={"title": "x", "assignee_id": board.ids["standard"]}, headers=board.h["admin"]
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Assignee's account is disabled"
+
+
+async def test_assigning_a_disabled_member_on_update_is_422(client: AsyncClient, board, db):
+    await _disable(db, "standard@example.com")
+
+    response = await client.patch(
+        f"{board.url}/{board.tasks['a']['id']}", json={"assignee_id": board.ids["standard"]}, headers=board.h["admin"]
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Assignee's account is disabled"
+
+
+async def test_a_task_whose_assignee_was_disabled_can_still_be_edited(client: AsyncClient, board, db):
+    """The rule applies when choosing an assignee, not to every later edit."""
+    url = f"{board.url}/{board.tasks['a']['id']}"
+    await client.patch(url, json={"assignee_id": board.ids["standard"]}, headers=board.h["admin"])
+    await _disable(db, "standard@example.com")
+
+    renamed = await client.patch(url, json={"title": "renamed"}, headers=board.h["admin"])
+    assert renamed.status_code == 200
+    assert renamed.json()["assignee"]["id"] == board.ids["standard"]
+
+    cleared = await client.patch(url, json={"assignee_id": None}, headers=board.h["admin"])
+    assert cleared.status_code == 200
+    assert cleared.json()["assignee"] is None

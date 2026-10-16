@@ -24,12 +24,24 @@ class AssigneeNotMember(Exception):
     """
 
 
+class AssigneeInactive(AssigneeNotMember):
+    """The chosen assignee is a member, but their account is disabled.
+
+    The same rule the intake resolver applies: a task given to someone who
+    cannot log in will never get done. A subclass, so any caller that only
+    knows AssigneeNotMember still refuses the request.
+    """
+
+
 async def _assignee_or_raise(
     db: AsyncSession,
     project_id: int,
     user_id: int,
 ) -> User:
-    """Return the user if they are a member of the project, else raise.
+    """Return the user if they are an active member of the project, else raise.
+
+    Only called when an assignee is being set, so a task whose assignee was
+    disabled later can still have its other fields edited.
 
     Returns the User rather than just validating, so the caller can attach it
     to the task and read task.assignee without another query.
@@ -42,6 +54,8 @@ async def _assignee_or_raise(
     user = result.scalar_one_or_none()
     if user is None:
         raise AssigneeNotMember(user_id)
+    if not user.is_active:
+        raise AssigneeInactive(user_id)
     return user
 
 
