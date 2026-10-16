@@ -31,5 +31,24 @@ services:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    environment:
+      # Read by the browser, not the container, so it is the host's address
+      # for the backend, not the compose service name.
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      # Keeps the container's own node_modules, installed by the Dockerfile.
+      # Without this the ./frontend mount above would hide it with the host's.
+      - /app/node_modules
+    depends_on:
+      - backend
+
 volumes:
   db_data:

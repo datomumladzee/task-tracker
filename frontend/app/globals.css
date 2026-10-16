@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* One light theme for now. Dark mode is week 5 polish, if at all. */
+body {
+  background: #fafafa;
+  color: #18181b;
+}
