@@ -1,10 +1,11 @@
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.core.unset import UNSET, Unset
 from app.projects.models import Project, ProjectMember, ProjectRole
+from app.tasks.models import Task
 from app.users.models import User
 from app.users.service import get_user_by_email
 
@@ -246,6 +247,15 @@ async def remove_member(db: AsyncSession, *, project_id: int, user_id: int) -> N
         if await _count_admins_locked(db, project_id) <= 1:
             raise LastAdmin
 
+    # Their tasks here go back to unassigned, or they would sit with someone
+    # who can no longer open them. Only this project's tasks: what they
+    # created, what they wrote, and their work elsewhere stay as they are.
+    # Same transaction as the delete, so both happen or neither does.
+    await db.execute(
+        update(Task)
+        .where(Task.project_id == project_id, Task.assignee_id == user_id)
+        .values(assignee_id=None)
+    )
     await db.delete(member)
     await db.commit()
 

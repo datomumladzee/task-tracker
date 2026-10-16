@@ -204,3 +204,60 @@ async def test_last_admin_cannot_leave(client: AsyncClient, team):
 async def test_removing_a_non_member_is_404(client: AsyncClient, team):
     url = f"/projects/{team.pid}/members/{team.ids['outsider']}"
     assert (await client.delete(url, headers=team.h["admin"])).status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# leaving a project gives back its tasks
+# ---------------------------------------------------------------------------
+
+
+async def _task(client, team, pid, title, who="admin", **fields):
+    return (await client.post(
+        f"/projects/{pid}/tasks", json={"title": title, **fields}, headers=team.h[who]
+    )).json()
+
+
+async def _get_task(client, team, pid, tid):
+    return (await client.get(f"/projects/{pid}/tasks/{tid}", headers=team.h["admin"])).json()
+
+
+async def test_removing_a_member_unassigns_their_tasks_here_only(client: AsyncClient, team):
+    """Their tasks in this project lose the assignee. What they created, what
+    they wrote, and their tasks in another project are left alone."""
+    assigned = await _task(client, team, team.pid, "theirs", assignee_id=team.ids["standard"])
+    created = await _task(client, team, team.pid, "made by them", who="standard", assignee_id=team.ids["admin"])
+    comment_url = f"/projects/{team.pid}/tasks/{assigned['id']}/comments"
+    await client.post(comment_url, json={"body": "said by them"}, headers=team.h["standard"])
+
+    other = (await client.post("/projects", json={"name": "Other"}, headers=team.h["admin"])).json()["id"]
+    await client.post(f"/projects/{other}/members", json={"email": "standard@example.com"}, headers=team.h["admin"])
+    elsewhere = await _task(client, team, other, "theirs elsewhere", assignee_id=team.ids["standard"])
+
+    response = await client.delete(f"/projects/{team.pid}/members/{team.ids['standard']}", headers=team.h["admin"])
+    assert response.status_code == 204
+
+    assert (await _get_task(client, team, team.pid, assigned["id"]))["assignee"] is None
+    kept = await _get_task(client, team, team.pid, created["id"])
+    assert kept["created_by_id"] == team.ids["standard"]
+    assert kept["assignee"]["id"] == team.ids["admin"]
+    comments = (await client.get(comment_url, headers=team.h["admin"])).json()
+    assert [c["author"]["id"] for c in comments] == [team.ids["standard"]]
+    assert (await _get_task(client, team, other, elsewhere["id"]))["assignee"]["id"] == team.ids["standard"]
+
+
+async def test_leaving_yourself_unassigns_your_tasks(client: AsyncClient, team):
+    task = await _task(client, team, team.pid, "mine", assignee_id=team.ids["viewer"])
+
+    response = await client.delete(f"/projects/{team.pid}/members/{team.ids['viewer']}", headers=team.h["viewer"])
+    assert response.status_code == 204
+
+    assert (await _get_task(client, team, team.pid, task["id"]))["assignee"] is None
+
+
+async def test_a_refused_last_admin_removal_touches_no_task(client: AsyncClient, team):
+    task = await _task(client, team, team.pid, "admin's", assignee_id=team.ids["admin"])
+
+    response = await client.delete(f"/projects/{team.pid}/members/{team.ids['admin']}", headers=team.h["admin"])
+    assert response.status_code == 409
+
+    assert (await _get_task(client, team, team.pid, task["id"]))["assignee"]["id"] == team.ids["admin"]
