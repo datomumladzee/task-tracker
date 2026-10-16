@@ -10,6 +10,7 @@ stops the app at startup instead of on some later request.
 """
 
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +26,23 @@ from app.tasks.router import router as tasks_router
 from app.users.router import router as users_router
 
 app = FastAPI(title="Task Tracker API")
+
+# The frontend runs on another port, which a browser treats as another site,
+# so it blocks reading our responses unless we say that site is allowed.
+# One exact origin, never "*": only our own frontend may call the API from a
+# browser. Local only, so the address is written here rather than in config.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_methods=["*"],
+    # Authorization for the bearer token, Content-Type for JSON bodies.
+    allow_headers=["Authorization", "Content-Type"],
+    # Browsers hide response headers from JavaScript unless listed here. The
+    # intake box needs Retry-After to show how long to wait after a 429, and
+    # WWW-Authenticate is how the frontend tells "your token is dead" apart
+    # from other 401s, like a wrong 2FA code.
+    expose_headers=["Retry-After", "WWW-Authenticate"],
+)
 
 # Routers are attached here, not defined here. main.py stays a table of
 # contents: what the app is, and which groups of endpoints it serves.
