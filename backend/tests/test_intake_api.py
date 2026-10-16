@@ -243,7 +243,20 @@ async def test_an_open_question_must_be_answered(client: AsyncClient, team, mode
     assert response.status_code == 422
     detail = response.json()["detail"]
     assert detail["field"] == "project"
+    assert detail["message"] == "Choose a project before confirming"
     assert [c["label"] for c in detail["candidates"]] == ["Auth API", "Auth Docs"]
+
+
+async def test_an_open_assignee_question_says_an_assignee(client: AsyncClient, team, model):
+    model.next = _draft(project_ref="Mobile", assignee_ref="nobody by this name")
+    draft_id = (await _parse(client, team)).json()["draft_id"]
+
+    response = await _confirm(client, team, draft_id)
+
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert detail["field"] == "assignee"
+    assert detail["message"] == "Choose an assignee before confirming"
 
 
 async def test_confirming_twice_makes_one_task(client: AsyncClient, team, model):

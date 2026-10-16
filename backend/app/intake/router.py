@@ -114,7 +114,9 @@ async def confirm(
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={
-                "message": f"Choose a {e.field} before confirming",
+                # The fields are "project" and "assignee", so the article
+                # depends on the word: "a project", "an assignee".
+                "message": f"Choose {'an' if e.field[0] in 'aeiou' else 'a'} {e.field} before confirming",
                 "field": e.field,
                 "question": e.resolution.question,
                 "candidates": [c.model_dump() for c in e.resolution.candidates],
