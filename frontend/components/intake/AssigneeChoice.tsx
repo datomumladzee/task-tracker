@@ -14,14 +14,16 @@ import type { Member, Resolution } from "@/lib/types";
 
 type Props = {
   resolution: Resolution;
-  // Members of the chosen project, or null while there is no project.
+  // Members of the chosen project, or null while there is no project or
+  // they are still loading. projectChosen tells those two apart.
   members: Member[] | null;
+  projectChosen: boolean;
   // The user's answer: undefined not answered, null nobody, or a user id.
   answer: number | null | undefined;
   onPick: (id: number | null) => void;
 };
 
-export function AssigneeChoice({ resolution, members, answer, onPick }: Props) {
+export function AssigneeChoice({ resolution, members, projectChosen, answer, onPick }: Props) {
   const unsure = answer === undefined && (resolution.outcome === "ambiguous" || resolution.outcome === "unknown");
 
   // What the dropdown shows: the answer, else the resolver's match, else
@@ -36,7 +38,11 @@ export function AssigneeChoice({ resolution, members, answer, onPick }: Props) {
       <div className="text-sm">
         <span className="mb-1 block font-medium text-zinc-700">Assignee</span>
         <p className="text-zinc-500">
-          {resolution.ref ? `"${resolution.ref}", checked once a project is chosen.` : "Unassigned"}
+          {projectChosen
+            ? "Loading members..."
+            : resolution.ref
+              ? `"${resolution.ref}", checked once a project is chosen.`
+              : "Unassigned"}
         </p>
       </div>
     );

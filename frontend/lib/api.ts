@@ -83,6 +83,9 @@ function messageFrom(detail: unknown, status: number): string {
   if (detail && typeof detail === "object" && "message" in detail) {
     return String((detail as { message: unknown }).message);
   }
+  // No detail at all: usually an unhandled server error, whose body is plain
+  // text rather than JSON.
+  if (status >= 500) return `The server had a problem (${status}). Try again in a moment.`;
   return `Request failed (${status})`;
 }
 

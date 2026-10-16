@@ -7,6 +7,7 @@
 import { useEffect, useState } from "react";
 import { AssigneeChoice } from "./AssigneeChoice";
 import { ProjectChoice } from "./ProjectChoice";
+import { UnsureBanner } from "./UnsureBanner";
 import { Button } from "../ui/Button";
 import { ErrorText } from "../ui/ErrorText";
 import { ApiError } from "@/lib/api";
@@ -70,6 +71,16 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
     };
   }, [projectId]);
   const memberList = projectId !== null && members?.projectId === projectId ? members.list : null;
+
+  // What is still open, for the banner. An answer closes a question even
+  // though the stored resolution keeps its original outcome.
+  const projectOpen = projectId === null ? projectRes.outcome : null;
+  const assigneeOpen =
+    answers.assigneeId === undefined && ["ambiguous", "unknown"].includes(assigneeRes.outcome)
+      ? assigneeRes.outcome
+      : assigneeRes.outcome === "waiting" && projectId === null
+        ? "waiting"
+        : null;
 
   // Record an edit only when it differs from the draft, so the confirm body
   // carries exactly what the user changed.
@@ -154,6 +165,8 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
         <p className="truncate text-xs text-zinc-500" title={parsed.text}>from &ldquo;{parsed.text}&rdquo;</p>
       </div>
 
+      <UnsureBanner project={projectOpen} assignee={assigneeOpen} />
+
       <div className="grid gap-3 md:grid-cols-2">
         <label className="block text-sm md:col-span-2">
           <span className="mb-1 block font-medium text-zinc-700">Title</span>
@@ -225,6 +238,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
         <AssigneeChoice
           resolution={assigneeRes}
           members={memberList}
+          projectChosen={projectId !== null}
           answer={answers.assigneeId}
           onPick={(id) => setAnswers((a) => ({ ...a, assigneeId: id }))}
         />

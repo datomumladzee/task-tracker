@@ -88,7 +88,14 @@ export function IntakeBox({ projects, currentProjectId, onCreated }: Props) {
         </Button>
       </form>
 
-      {busy && <p className="text-sm text-zinc-500">The AI is reading your sentence...</p>}
+      {/* role="status" so screen readers announce it too. Gemini usually
+          answers in about a second, but a fallback model can take several. */}
+      {busy && (
+        <p role="status" className="flex items-center gap-2 text-sm text-zinc-600">
+          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
+          The AI is thinking about your sentence...
+        </p>
+      )}
       {/* Once the wait is over, the 429's "try again in N seconds" is stale. */}
       {!(error && waitUntil && !waiting) && <ErrorText message={error} />}
 
