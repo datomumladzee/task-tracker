@@ -5,11 +5,16 @@
 //
 // useProjectsWithTasks draws the cards from the projects list at once, then
 // fills in each card's bar and counts as that project's tasks arrive.
+//
+// The header: the title with two chips (how many projects, admin on how
+// many), the New project button on the same line, and a role filter that
+// narrows the cards. The overview totals always cover every project.
 
 import { useState } from "react";
 import { NewProjectForm } from "@/components/projects/NewProjectForm";
 import { Overview } from "@/components/projects/Overview";
 import { ProjectCard } from "@/components/projects/ProjectCard";
+import { RoleFilter, type RoleFilterValue } from "@/components/projects/RoleFilter";
 import { Button } from "@/components/ui/Button";
 import { ErrorText } from "@/components/ui/ErrorText";
 import { useAuth } from "@/lib/auth";
@@ -22,6 +27,7 @@ export default function ProjectsPage() {
   const { user } = useAuth();
   const { projects, error, tasks, reload } = useProjectsWithTasks();
   const [formOpen, setFormOpen] = useState(false);
+  const [filter, setFilter] = useState<RoleFilterValue>("all");
   const today = todayIso();
 
   function closeForm() {
@@ -31,7 +37,12 @@ export default function ProjectsPage() {
     requestAnimationFrame(() => document.getElementById(NEW_BUTTON_ID)?.focus());
   }
 
-  const adminCount = projects?.filter((p) => p.role === "admin").length ?? 0;
+  const counts: Record<RoleFilterValue, number> = { all: projects?.length ?? 0, admin: 0, standard: 0, viewer: 0 };
+  for (const p of projects ?? []) counts[p.role] += 1;
+  // If the chosen role has no projects any more (one was deleted or you
+  // left it), fall back to All instead of showing an empty grid.
+  const activeFilter: RoleFilterValue = counts[filter] > 0 ? filter : "all";
+  const shown = (projects ?? []).filter((p) => activeFilter === "all" || p.role === activeFilter);
 
   // Counts per project, worked out once and shared by the overview strip and
   // the cards. Loading (undefined) and failed ("error") pass straight
@@ -46,21 +57,33 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="font-brand text-2xl font-semibold text-ink">Projects</h1>
-          {projects && projects.length > 0 && (
-            <p className="text-sm text-muted">
-              {projects.length} {projects.length === 1 ? "project" : "projects"}
-              {adminCount > 0 && ` · admin on ${adminCount}`}
-            </p>
+      <div className="space-y-4">
+        {/* Title and chips on the left, New project on the right, on one
+            centre line. On phones the button drops below, full width. */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 className="font-brand text-3xl font-semibold text-ink">Projects</h1>
+            {projects && projects.length > 0 && (
+              <>
+                <span className="rounded-full border border-line bg-card px-3 py-1 text-sm font-medium text-ink">
+                  {counts.all} {counts.all === 1 ? "project" : "projects"}
+                </span>
+                {counts.admin > 0 && (
+                  <span className="rounded-full bg-navy/10 px-3 py-1 text-sm font-medium text-navy">Admin on {counts.admin}</span>
+                )}
+              </>
+            )}
+          </div>
+          {!formOpen && projects && projects.length > 0 && (
+            <Button id={NEW_BUTTON_ID} size="lg" onClick={() => setFormOpen(true)} className="flex w-full items-center justify-center gap-2 sm:w-auto">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              New project
+            </Button>
           )}
         </div>
-        {!formOpen && projects && projects.length > 0 && (
-          <Button id={NEW_BUTTON_ID} size="lg" onClick={() => setFormOpen(true)}>
-            New project
-          </Button>
-        )}
+        {projects && projects.length > 0 && <RoleFilter counts={counts} value={activeFilter} onChange={setFilter} />}
       </div>
 
       {formOpen && (
@@ -101,7 +124,7 @@ export default function ProjectsPage() {
 
       {projects && projects.length > 0 && (
         <ul className="grid gap-4 md:grid-cols-2">
-          {projects.map((p) => (
+          {shown.map((p) => (
             <li key={p.id}>
               <ProjectCard project={p} stats={statsById.get(p.id)} currentUserId={user?.id} />
             </li>
