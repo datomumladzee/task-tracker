@@ -6,6 +6,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { HealthBadge } from "./HealthBadge";
+import { Wordmark } from "./Wordmark";
 
 export function AppHeader() {
   const { user, signOut } = useAuth();
@@ -13,8 +14,8 @@ export function AppHeader() {
     // The global focus ring is navy and would vanish here, so anything
     // focused inside the header gets a white one instead.
     <header className="flex items-center gap-4 bg-navy px-6 py-3 text-white [&_:focus-visible]:outline-white">
-      <Link href="/projects" className="font-semibold">
-        Task Tracker
+      <Link href="/projects">
+        <Wordmark />
       </Link>
       <nav className="flex gap-3 text-sm text-white/75">
         <Link href="/projects" className="hover:text-white">Projects</Link>
@@ -30,7 +31,7 @@ export function AppHeader() {
           onClick={signOut}
           className="rounded border border-white/60 px-3 py-1.5 font-medium hover:bg-white/10"
         >
-          Log out
+          Sign out
         </button>
       </div>
     </header>

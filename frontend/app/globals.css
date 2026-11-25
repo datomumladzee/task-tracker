@@ -6,8 +6,9 @@
    changing a colour later is a one-line change here.
 
    Rules (see the design decisions):
-   - lime is only ever a fill, always with navy text on it. On white it is
-     about 1.15:1, too faint for text, borders or the focus ring.
+   - on light backgrounds lime is only ever a fill, with navy text on it. On
+     white it is about 1.15:1, too faint for text, borders or the focus ring.
+     On navy it is about 12.6:1, so the wordmark's "Tracker" may be lime.
    - lime means "the main action on this screen" or "the AI did this".
    - solid navy is for the header bar; elsewhere navy is text or an outline. */
 @theme {
@@ -29,6 +30,31 @@
      2FA on) need a colour, and green is what people read as done. */
   --color-ok: #166534;
   --color-ok-bg: #f0fdf4;
+
+  /* Dark surfaces: the login, register and 2FA pages. Added next to the light
+     tokens rather than replacing them, so the rest of the app is untouched.
+     Contrast on the card at its lightest: on-dark ~12.9:1, muted-on-dark
+     ~6.2:1, danger-on-dark ~7.1:1, warn-on-dark ~9.4:1. The light danger and
+     warn are about 2:1 here, which is why these exist. */
+  --color-night-top: #07141f;
+  --color-night-mid: #0b1f2e;
+  --color-night-end: #163a52;
+  --color-surface-on-dark: rgb(16 44 64 / 0.8); /* navy #102c40 at 80% */
+  --color-field-on-dark: #0b1f2e;
+  --color-on-dark: #f7fafc;
+  --color-muted-on-dark: #9fb3c2;
+  /* Two borders on purpose: the card's edge is decoration and can be faint,
+     but a text field's edge is how you find it, so it needs about 3:1. */
+  --color-line-on-dark: rgb(255 255 255 / 0.1);
+  --color-field-line-on-dark: rgb(255 255 255 / 0.35);
+  --color-danger-on-dark: #fca5a5;
+  --color-warn-on-dark: #fcd34d;
+}
+
+/* "inline" because the value is a variable next/font sets on <html>; without
+   it Tailwind would resolve it too early. Gives the font-brand class. */
+@theme inline {
+  --font-brand: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* One light theme for now. */

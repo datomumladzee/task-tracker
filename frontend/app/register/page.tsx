@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/lib/auth";
 import { login, register } from "@/lib/endpoints";
 import { errorMessage } from "@/lib/errors";
+import { checkEmail, checkName, checkNewPassword, useFieldErrors } from "@/lib/validation";
 
 export default function RegisterPage() {
   const { signIn } = useAuth();
@@ -23,9 +24,13 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { errors, validateAll, recheck } = useFieldErrors<"fullName" | "email" | "password">();
 
-  async function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Our checks first; nothing is sent while a field is wrong.
+    const checks = { fullName: checkName(fullName), email: checkEmail(email), password: checkNewPassword(password) };
+    if (!validateAll(e.currentTarget, checks)) return;
     setBusy(true);
     setError(null);
     try {
@@ -43,18 +48,62 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthCard title="Create an account">
-      <form onSubmit={submit} className="space-y-3">
-        <Input label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" required />
-        <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
-        {/* 8 to 128, the same rule as UserCreate. The backend still checks. */}
-        <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={8} maxLength={128} required />
-        <ErrorText message={error} />
-        <Button type="submit" disabled={busy} className="w-full">
-          {busy ? "Creating..." : "Create account"}
+    <AuthCard title="Sign up">
+      <form onSubmit={submit} noValidate className="space-y-5">
+        <Input
+          tone="dark"
+          label="Full name"
+          name="fullName"
+          placeholder="Your full name"
+          value={fullName}
+          onChange={(e) => {
+            setFullName(e.target.value);
+            recheck("fullName", checkName(e.target.value));
+          }}
+          error={errors.fullName}
+          autoComplete="name"
+          required
+        />
+        <Input
+          tone="dark"
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            recheck("email", checkEmail(e.target.value));
+          }}
+          error={errors.email}
+          autoComplete="email"
+          required
+        />
+        {/* 8 to 128, the same rule as UserCreate. maxLength stays: it stops
+            typing at 128, which noValidate does not turn off. */}
+        <Input
+          tone="dark"
+          label="Password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            recheck("password", checkNewPassword(e.target.value));
+          }}
+          error={errors.password}
+          autoComplete="new-password"
+          minLength={8}
+          maxLength={128}
+          required
+        />
+        <ErrorText message={error} tone="dark" />
+        <Button type="submit" size="lg" tone="dark" disabled={busy} className="w-full">
+          {busy ? "Signing up..." : "Sign up"}
         </Button>
-        <p className="text-center text-sm text-muted">
-          Have an account? <Link href="/login" className="underline">Log in</Link>
+        <p className="text-center text-sm text-muted-on-dark">
+          Have an account? <Link href="/login" className="text-on-dark underline hover:text-white">Sign in</Link>
         </p>
       </form>
     </AuthCard>

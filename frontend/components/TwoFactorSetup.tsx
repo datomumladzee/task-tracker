@@ -76,7 +76,7 @@ export function TwoFactorSetup({ enabled, onVerified }: Props) {
 
       {enabled ? (
         <p className="text-sm text-muted">
-          Your next login will ask for a code from your authenticator app.
+          Next time you sign in, you will be asked for a code from your authenticator app.
         </p>
       ) : (
         <>
