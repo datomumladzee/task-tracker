@@ -2,7 +2,7 @@
 // GET /projects/{id}/tasks. No backend summary exists yet; with many projects
 // that one request per card would be the reason to add one.
 
-import type { Task, TaskStatus } from "./types";
+import type { Project, Task, TaskStatus } from "./types";
 
 export type ProjectStats = {
   total: number;
@@ -59,12 +59,58 @@ export function timeAgo(iso: string, now: number = Date.now()): string {
   return "just now";
 }
 
+// --- My tasks ----------------------------------------------------------------
+
+export type MyTask = { task: Task; project: Project };
+
+// Overdue and due dates only mean something for open work, so a done task
+// goes in "done" whatever its date.
+export type Group = "overdue" | "week" | "later" | "none" | "done";
+
+export const GROUPS: { key: Group; label: string }[] = [
+  { key: "overdue", label: "Overdue" },
+  { key: "week", label: "Due this week" },
+  { key: "later", label: "Later" },
+  { key: "none", label: "No due date" },
+  { key: "done", label: "Done" },
+];
+
 // Adds days to a YYYY-MM-DD date in local time and returns the same shape.
 export function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
   const date = new Date(y, m - 1, d + days);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+export function groupOf(task: Task, today: string): Group {
+  if (task.status === "done") return "done";
+  if (!task.due_date) return "none";
+  if (task.due_date < today) return "overdue";
+  // This week means today and the six days after it.
+  if (task.due_date <= addDays(today, 6)) return "week";
+  return "later";
+}
+
+// Every task assigned to userId across the loaded projects, soonest due
+// first and undated last, then by title. Projects still loading or failed
+// are skipped; the page says which.
+export function myTasks(projects: Project[], tasks: Record<number, Task[] | "error">, userId: number, includeDone: boolean): MyTask[] {
+  const mine: MyTask[] = [];
+  for (const project of projects) {
+    const list = tasks[project.id];
+    if (!Array.isArray(list)) continue;
+    for (const task of list) {
+      if (task.assignee?.id !== userId) continue;
+      if (task.status === "done" && !includeDone) continue;
+      mine.push({ task, project });
+    }
+  }
+  return mine.sort((a, b) => {
+    const da = a.task.due_date ?? "9999-99-99";
+    const db = b.task.due_date ?? "9999-99-99";
+    return da === db ? a.task.title.localeCompare(b.task.title) : da < db ? -1 : 1;
+  });
 }
 
 // "Today", "Tomorrow", "Yesterday", else "Nov 20" (with the year when it is
@@ -76,4 +122,67 @@ export function dueLabel(iso: string, today: string): string {
   const [y, m, d] = iso.split("-").map(Number);
   const sameYear = iso.slice(0, 4) === today.slice(0, 4);
   return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", ...(sameYear ? {} : { year: "numeric" }) }).format(new Date(y, m - 1, d));
+}
+
+// --- Calendar ----------------------------------------------------------------
+// Weeks start on Monday. Every date is a YYYY-MM-DD string in local time, the
+// same shape as due_date, so days compare and key as plain strings.
+
+function isoOf(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function dateOf(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+// The Monday on or before the given day.
+export function startOfWeek(iso: string): string {
+  const day = dateOf(iso).getDay(); // 0 Sunday ... 6 Saturday
+  return addDays(iso, -((day + 6) % 7));
+}
+
+export function weekOf(startIso: string): string[] {
+  return Array.from({ length: 7 }, (_, i) => addDays(startIso, i));
+}
+
+// "2026-11" plus or minus whole months.
+export function addMonths(month: string, n: number): string {
+  const [y, m] = month.split("-").map(Number);
+  return isoOf(new Date(y, m - 1 + n, 1)).slice(0, 7);
+}
+
+// The weeks shown for a month: from the Monday on or before the 1st to the
+// Sunday on or after the last day, so every row is a full week.
+export function monthWeeks(month: string): string[][] {
+  const first = `${month}-01`;
+  const last = addDays(addMonths(month, 1) + "-01", -1);
+  const weeks: string[][] = [];
+  for (let start = startOfWeek(first); start <= last; start = addDays(start, 7)) weeks.push(weekOf(start));
+  return weeks;
+}
+
+export function monthLabel(month: string): string {
+  return new Intl.DateTimeFormat("en", { month: "long", year: "numeric" }).format(dateOf(`${month}-01`));
+}
+
+// "Thursday, November 26"
+export function longDay(iso: string): string {
+  return new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(dateOf(iso));
+}
+
+// "Thu 26"
+export function shortDay(iso: string): string {
+  const d = dateOf(iso);
+  return `${new Intl.DateTimeFormat("en", { weekday: "short" }).format(d)} ${d.getDate()}`;
+}
+
+// "Nov 23 – 29", or "Nov 30 – Dec 6" across a month.
+export function weekRange(startIso: string): string {
+  const end = addDays(startIso, 6);
+  const fmt = (iso: string, withMonth: boolean) =>
+    new Intl.DateTimeFormat("en", withMonth ? { month: "short", day: "numeric" } : { day: "numeric" }).format(dateOf(iso));
+  return `${fmt(startIso, true)} – ${fmt(end, startIso.slice(5, 7) !== end.slice(5, 7))}`;
 }

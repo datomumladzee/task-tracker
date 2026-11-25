@@ -13,6 +13,7 @@ export function tileShade(id: number): string {
 const sizes = {
   md: "h-10 w-10 rounded-lg text-lg",
   sm: "h-6 w-6 rounded-md text-xs",
+  xs: "h-4 w-4 rounded text-[10px]",
 };
 
 export function LetterTile({ id, name, size = "md" }: { id: number; name: string; size?: keyof typeof sizes }) {

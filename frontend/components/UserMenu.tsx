@@ -46,6 +46,11 @@ export function UserMenu() {
             <p className="truncate font-medium text-ink">{user.full_name}</p>
             <p className="truncate text-sm text-muted">{user.email}</p>
           </div>
+          {/* Phones only: there the header hides its nav links, so this is
+              the way to My tasks. On wider screens the nav has it. */}
+          <Link role="menuitem" tabIndex={-1} href="/my-tasks" onClick={() => close(false)} className={`${menuItemClass} sm:hidden`}>
+            My tasks
+          </Link>
           <Link role="menuitem" tabIndex={-1} href="/settings" onClick={() => close(false)} className={menuItemClass}>
             Settings
           </Link>

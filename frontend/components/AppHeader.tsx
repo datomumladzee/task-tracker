@@ -5,7 +5,7 @@
 //
 // One row, everything on the same centre line: logo, nav, then the avatar at
 // the far right. On phones the nav is hidden, leaving logo and avatar; the
-// logo leads to Projects and the avatar menu holds Settings.
+// logo leads to Projects and the avatar menu holds My tasks and Settings.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,6 +14,7 @@ import { UserMenu } from "./UserMenu";
 
 const links = [
   { href: "/projects", label: "Projects" },
+  { href: "/my-tasks", label: "My tasks" },
   { href: "/settings", label: "Settings" },
 ];
 

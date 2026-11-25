@@ -25,7 +25,11 @@ export function useMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
 
-  const items = () => Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+  // Only items that are showing: an item can be hidden at some widths (My
+  // tasks in the avatar menu is phones only), and a hidden one cannot take
+  // focus, which would leave the arrow keys stuck.
+  const items = () =>
+    Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []).filter((el) => el.getClientRects().length > 0);
 
   function openAt(which: "first" | "last") {
     setOpen(true);
