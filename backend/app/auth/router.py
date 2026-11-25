@@ -169,7 +169,7 @@ async def totp_login(
     if subject is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired session, log in again",
+            detail="Invalid or expired session, sign in again",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -180,7 +180,7 @@ async def totp_login(
     if user is None or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired session, log in again",
+            detail="Invalid or expired session, sign in again",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

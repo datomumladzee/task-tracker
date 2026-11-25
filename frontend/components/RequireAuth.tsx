@@ -8,16 +8,22 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth";
+import { loginPath, useAuth } from "@/lib/auth";
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { status } = useAuth();
+  const { status, signedOutOnPurpose } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "out") router.replace("/login");
-  }, [status, router]);
+    if (status !== "out") return;
+    // Chose Sign out: a plain sign-in page. Arrived signed out, or the
+    // session ran out: remember this page, so signing in comes back to it.
+    // window.location rather than useSearchParams, which would need a
+    // Suspense boundary around every page.
+    const here = window.location.pathname + window.location.search;
+    router.replace(signedOutOnPurpose ? "/login" : loginPath(here));
+  }, [status, signedOutOnPurpose, router]);
 
-  if (status !== "in") return <p className="p-8 text-sm text-zinc-500">Loading...</p>;
+  if (status !== "in") return <p className="p-8 text-sm text-muted">Loading...</p>;
   return <>{children}</>;
 }

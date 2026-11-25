@@ -31,18 +31,18 @@ export default function ProjectsPage() {
       <section className="space-y-3">
         <h1 className="text-xl font-semibold">Projects</h1>
         <ErrorText message={error} />
-        {projects === null && !error && <p className="text-sm text-zinc-500">Loading...</p>}
-        {projects?.length === 0 && <p className="text-sm text-zinc-500">No projects yet. Create one to start.</p>}
+        {projects === null && !error && <p className="text-sm text-muted">Loading...</p>}
+        {projects?.length === 0 && <p className="text-sm text-muted">No projects yet. Create one to start.</p>}
         <ul className="space-y-2">
           {projects?.map((p) => (
             <li key={p.id}>
               <Link
                 href={`/projects/${p.id}`}
-                className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-4 py-3 hover:border-zinc-400"
+                className="flex items-center justify-between rounded-lg border border-line bg-card px-4 py-3 hover:border-navy"
               >
                 <span>
                   <span className="font-medium">{p.name}</span>
-                  {p.description && <span className="block text-sm text-zinc-500">{p.description}</span>}
+                  {p.description && <span className="block text-sm text-muted">{p.description}</span>}
                 </span>
                 <RoleBadge role={p.role} />
               </Link>

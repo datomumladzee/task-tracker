@@ -11,8 +11,8 @@ type Props = {
 
 export function Question({ question, candidates, onPick }: Props) {
   return (
-    <div className="space-y-2 rounded bg-amber-50 p-2">
-      {question && <p className="text-sm text-amber-900">{question}</p>}
+    <div className="space-y-2 rounded bg-warn-bg p-2">
+      {question && <p className="text-sm text-warn">{question}</p>}
       {candidates.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {candidates.map((c) => (
@@ -20,7 +20,7 @@ export function Question({ question, candidates, onPick }: Props) {
               key={c.id}
               type="button"
               onClick={() => onPick(c.id)}
-              className="rounded border border-amber-300 bg-white px-2 py-1 text-sm hover:bg-amber-100"
+              className="rounded border border-warn/40 bg-card px-2 py-1 text-sm hover:bg-warn-bg"
             >
               {c.label}
             </button>

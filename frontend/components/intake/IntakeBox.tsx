@@ -11,6 +11,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { DraftCard } from "./DraftCard";
+import { AiBadge } from "../AiBadge";
 import { Button } from "../ui/Button";
 import { ErrorText } from "../ui/ErrorText";
 import { ApiError } from "@/lib/api";
@@ -72,8 +73,9 @@ export function IntakeBox({ projects, currentProjectId, onCreated }: Props) {
   const elsewhere = created && created.project_id !== currentProjectId ? projects.find((p) => p.id === created.project_id) : null;
 
   return (
-    <section className="space-y-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-      <form onSubmit={submit} className="flex gap-2">
+    <section className="space-y-3 rounded-lg border border-line bg-card p-4 shadow-sm">
+      <form onSubmit={submit} className="flex items-center gap-2">
+        <AiBadge />
         <input
           aria-label="Describe a task"
           value={text}
@@ -81,7 +83,7 @@ export function IntakeBox({ projects, currentProjectId, onCreated }: Props) {
           placeholder='Describe a task, e.g. "ship auth docs by friday, assign to me"'
           maxLength={2000}
           disabled={busy}
-          className="flex-1 rounded border border-zinc-300 bg-white px-3 py-2"
+          className="flex-1 rounded border border-line bg-card px-3 py-2"
         />
         <Button type="submit" disabled={busy || waiting || !text.trim()}>
           {busy ? "Reading..." : waiting ? `Wait ${wait}s` : "Draft it"}
@@ -91,8 +93,8 @@ export function IntakeBox({ projects, currentProjectId, onCreated }: Props) {
       {/* role="status" so screen readers announce it too. Gemini usually
           answers in about a second, but a fallback model can take several. */}
       {busy && (
-        <p role="status" className="flex items-center gap-2 text-sm text-zinc-600">
-          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
+        <p role="status" className="flex items-center gap-2 text-sm text-muted">
+          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-navy border-t-transparent" />
           The AI is thinking about your sentence...
         </p>
       )}
@@ -100,7 +102,7 @@ export function IntakeBox({ projects, currentProjectId, onCreated }: Props) {
       {!(error && waitUntil && !waiting) && <ErrorText message={error} />}
 
       {created && (
-        <p className="rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <p className="rounded bg-ok-bg px-3 py-2 text-sm text-ok">
           Created &ldquo;{created.title}&rdquo;
           {elsewhere ? (
             <>

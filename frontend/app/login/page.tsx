@@ -15,9 +15,16 @@ import { AuthCard } from "@/components/AuthCard";
 import { Button } from "@/components/ui/Button";
 import { ErrorText } from "@/components/ui/ErrorText";
 import { Input } from "@/components/ui/Input";
-import { useAuth } from "@/lib/auth";
+import { safeNext, useAuth } from "@/lib/auth";
 import { login, totpLogin } from "@/lib/endpoints";
 import { errorMessage } from "@/lib/errors";
+import { checkEmail, checkLoginPassword, useFieldErrors } from "@/lib/validation";
+
+// The page to return to: /login?next=/projects/45 came from RequireAuth.
+// Read when needed, not at render, since the server has no window.
+function destination(): string {
+  return safeNext(new URLSearchParams(window.location.search).get("next"));
+}
 
 export default function LoginPage() {
   const { status, signIn } = useAuth();
@@ -29,19 +36,22 @@ export default function LoginPage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { errors, validateAll, recheck } = useFieldErrors<"email" | "password">();
 
-  // Already logged in, for example after a refresh: nothing to do here.
+  // Already signed in, for example after a refresh: nothing to do here.
   useEffect(() => {
-    if (status === "in") router.replace("/projects");
+    if (status === "in") router.replace(destination());
   }, [status, router]);
 
   async function finish(accessToken: string) {
     await signIn(accessToken);
-    router.push("/projects");
+    router.push(destination());
   }
 
-  async function submitPassword(e: React.FormEvent) {
+  async function submitPassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Our checks first; nothing is sent while a field is wrong.
+    if (!validateAll(e.currentTarget, { email: checkEmail(email), password: checkLoginPassword(password) })) return;
     setBusy(true);
     setError(null);
     try {
@@ -85,10 +95,10 @@ export default function LoginPage() {
 
   if (pendingToken) {
     return (
-      <AuthCard title="Two-factor code">
-        <form onSubmit={submitCode} className="space-y-3">
-          <p className="text-sm text-zinc-600">Enter the 6-digit code from your authenticator app.</p>
+      <AuthCard title="Two-factor code" subtitle="Enter the 6-digit code from your authenticator app.">
+        <form onSubmit={submitCode} className="space-y-5">
           <Input
+            tone="dark"
             label="Code"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
@@ -97,11 +107,11 @@ export default function LoginPage() {
             autoFocus
             required
           />
-          <ErrorText message={error} />
-          <Button type="submit" disabled={busy || code.length !== 6} className="w-full">
+          <ErrorText message={error} tone="dark" />
+          <Button type="submit" size="lg" tone="dark" disabled={busy || code.length !== 6} className="w-full">
             Verify
           </Button>
-          <button type="button" onClick={startOver} className="w-full text-sm text-zinc-600 underline">
+          <button type="button" onClick={startOver} className="w-full text-sm text-muted-on-dark underline hover:text-on-dark">
             Start over
           </button>
         </form>
@@ -110,16 +120,44 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthCard title="Log in">
-      <form onSubmit={submitPassword} className="space-y-3">
-        <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
-        <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
-        <ErrorText message={error} />
-        <Button type="submit" disabled={busy} className="w-full">
-          {busy ? "Logging in..." : "Log in"}
+    <AuthCard title="Sign in">
+      <form onSubmit={submitPassword} noValidate className="space-y-5">
+        <Input
+          tone="dark"
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            recheck("email", checkEmail(e.target.value));
+          }}
+          error={errors.email}
+          autoComplete="email"
+          required
+        />
+        <Input
+          tone="dark"
+          label="Password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            recheck("password", checkLoginPassword(e.target.value));
+          }}
+          error={errors.password}
+          autoComplete="current-password"
+          required
+        />
+        <ErrorText message={error} tone="dark" />
+        <Button type="submit" size="lg" tone="dark" disabled={busy} className="w-full">
+          {busy ? "Signing in..." : "Sign in"}
         </Button>
-        <p className="text-center text-sm text-zinc-600">
-          No account? <Link href="/register" className="underline">Register</Link>
+        <p className="text-center text-sm text-muted-on-dark">
+          No account? <Link href="/register" className="text-on-dark underline hover:text-white">Sign up</Link>
         </p>
       </form>
     </AuthCard>

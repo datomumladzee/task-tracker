@@ -24,7 +24,7 @@ export function UnsureBanner({ project, assignee }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <div role="status" className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+    <div role="status" className="rounded border border-warn/40 bg-warn-bg px-3 py-2 text-sm text-warn">
       <p className="font-medium">The AI wasn&apos;t sure about {items.join(" and ")}.</p>
       <p>Pick an answer below to continue.</p>
     </div>

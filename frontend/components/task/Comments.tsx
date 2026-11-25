@@ -65,16 +65,16 @@ export function Comments({ task, role, currentUserId }: Props) {
     <section className="space-y-3">
       <h3 className="font-semibold">Comments</h3>
       {loadError && <ErrorText message={loadError} />}
-      {!loadError && comments === null && <p className="text-sm text-zinc-500">Loading comments...</p>}
-      {comments?.length === 0 && <p className="text-sm text-zinc-500">No comments yet.</p>}
+      {!loadError && comments === null && <p className="text-sm text-muted">Loading comments...</p>}
+      {comments?.length === 0 && <p className="text-sm text-muted">No comments yet.</p>}
       <ul className="space-y-2">
         {comments?.map((c) => (
-          <li key={c.id} className="rounded border border-zinc-200 bg-zinc-50 p-2 text-sm">
-            <div className="mb-1 flex items-center justify-between text-xs text-zinc-500">
+          <li key={c.id} className="rounded border border-line bg-page p-2 text-sm">
+            <div className="mb-1 flex items-center justify-between text-xs text-muted">
               {/* author is null after that account was deleted. */}
               <span>{c.author?.full_name ?? "Deleted user"} · {new Date(c.created_at).toLocaleString()}</span>
               {can.deleteComment(role, c.author?.id === currentUserId) && (
-                <button type="button" onClick={() => remove(c)} className="text-red-700 hover:underline">Delete</button>
+                <button type="button" onClick={() => remove(c)} className="text-danger hover:underline">Delete</button>
               )}
             </div>
             <p className="whitespace-pre-wrap">{c.body}</p>
@@ -90,9 +90,9 @@ export function Comments({ task, role, currentUserId }: Props) {
             onChange={(e) => setBody(e.target.value)}
             maxLength={5000}
             rows={2}
-            className="w-full rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm"
+            className="w-full rounded border border-line bg-card px-2 py-1.5 text-sm"
           />
-          <Button type="submit" disabled={busy || !body.trim()}>{busy ? "Posting..." : "Add comment"}</Button>
+          <Button type="submit" variant="secondary" disabled={busy || !body.trim()}>{busy ? "Posting..." : "Add comment"}</Button>
         </form>
       )}
       <ErrorText message={error} />

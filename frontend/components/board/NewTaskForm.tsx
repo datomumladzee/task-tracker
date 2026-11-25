@@ -46,19 +46,19 @@ export function NewTaskForm({ projectId, onCreated }: Props) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
-          className="flex-1 rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm"
+          className="flex-1 rounded border border-line bg-card px-2 py-1.5 text-sm"
         />
         <select
           aria-label="Priority"
           value={priority}
           onChange={(e) => setPriority(e.target.value as TaskPriority)}
-          className="rounded border border-zinc-300 bg-white px-2 text-sm"
+          className="rounded border border-line bg-card px-2 text-sm"
         >
           {PRIORITIES.map((p) => (
             <option key={p} value={p}>{p}</option>
           ))}
         </select>
-        <Button type="submit" disabled={busy || !title.trim()}>Add</Button>
+        <Button type="submit" variant="secondary" disabled={busy || !title.trim()}>Add</Button>
       </div>
       <ErrorText message={error} />
     </form>
