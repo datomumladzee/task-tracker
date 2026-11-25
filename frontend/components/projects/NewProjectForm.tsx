@@ -1,6 +1,7 @@
 "use client";
 
 // Create a project. Any logged-in user may, and becomes its admin.
+// Opened from the "New project" button; Cancel or Escape closes it.
 
 import { useState } from "react";
 import { Button } from "../ui/Button";
@@ -9,7 +10,12 @@ import { Input } from "../ui/Input";
 import { createProject } from "@/lib/endpoints";
 import { errorMessage } from "@/lib/errors";
 
-export function NewProjectForm({ onCreated }: { onCreated: () => void }) {
+type Props = {
+  onCreated: () => void;
+  onCancel: () => void;
+};
+
+export function NewProjectForm({ onCreated, onCancel }: Props) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,25 +27,55 @@ export function NewProjectForm({ onCreated }: { onCreated: () => void }) {
     setError(null);
     try {
       await createProject({ name, description: description.trim() || null });
-      setName("");
-      setDescription("");
       // Reload the list rather than inserting the reply, so the order and
       // every role come from the one endpoint the page already trusts.
       onCreated();
     } catch (err) {
       setError(errorMessage(err));
-    } finally {
       setBusy(false);
     }
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-lg border border-line bg-card p-4">
-      <h2 className="font-semibold">New project</h2>
-      <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} maxLength={200} required />
-      <Input label="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} />
+    <form
+      onSubmit={submit}
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && !busy) onCancel();
+      }}
+      aria-labelledby="new-project-title"
+      className="space-y-5 rounded-xl border border-line bg-card p-5 shadow-sm"
+    >
+      <h2 id="new-project-title" className="font-brand text-lg font-semibold text-ink">New project</h2>
+      <div className="grid gap-5 md:grid-cols-2">
+        {/* autoFocus: the button that opened this form is gone, so focus
+            has to land somewhere useful. */}
+        <Input
+          label="Name"
+          size="lg"
+          placeholder="Website relaunch"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={200}
+          autoFocus
+          required
+        />
+        <Input
+          label="Description (optional)"
+          size="lg"
+          placeholder="What this project is for"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
       <ErrorText message={error} />
-      <Button type="submit" disabled={busy || !name.trim()}>{busy ? "Creating..." : "Create project"}</Button>
+      <div className="flex gap-2">
+        <Button type="submit" size="lg" disabled={busy || !name.trim()}>
+          {busy ? "Creating..." : "Create project"}
+        </Button>
+        <Button type="button" size="lg" variant="quiet" onClick={onCancel} disabled={busy}>
+          Cancel
+        </Button>
+      </div>
     </form>
   );
 }

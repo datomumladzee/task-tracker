@@ -18,16 +18,26 @@
 
 import { useId, useState } from "react";
 
-type Props = React.InputHTMLAttributes<HTMLInputElement> & {
+// size replaces the native <input size>, a character width nobody uses here.
+// lg matches a size="lg" Button: 46px tall. Dark fields are lg by default.
+type Props = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> & {
   label: string;
   tone?: "light" | "dark";
+  size?: "md" | "lg";
   error?: string;
+};
+
+const sizes = {
+  md: "px-2 py-1.5",
+  lg: "px-3 py-2.5 text-base",
 };
 
 const looks = {
   light: {
     label: "text-ink",
-    field: "px-2 py-1.5 bg-card focus:border-navy",
+    // placeholder:text-muted: Tailwind's default (text at 50%) is about 3.2:1
+    // on white; muted is about 5.5:1.
+    field: "bg-card placeholder:text-muted focus:border-navy",
     border: "border-line",
     bad: "border-danger",
     message: "text-danger",
@@ -36,9 +46,7 @@ const looks = {
   },
   dark: {
     label: "text-on-dark",
-    // Larger on the auth pages: these are the only fields on the screen.
-    // Same height as a size="lg" Button.
-    field: "px-3 py-2.5 text-base bg-field-on-dark text-on-dark placeholder:text-muted-on-dark focus:border-lime",
+    field: "bg-field-on-dark text-on-dark placeholder:text-muted-on-dark focus:border-lime",
     border: "border-field-line-on-dark",
     bad: "border-danger-on-dark",
     message: "text-danger-on-dark",
@@ -46,8 +54,9 @@ const looks = {
   },
 };
 
-export function Input({ label, tone = "light", error, className = "", id, type, ...props }: Props) {
+export function Input({ label, tone = "light", size, error, className = "", id, type, ...props }: Props) {
   const look = looks[tone];
+  const padding = sizes[size ?? (tone === "dark" ? "lg" : "md")];
   const autoId = useId();
   const inputId = id ?? `${autoId}-input`;
   const messageId = `${autoId}-message`;
@@ -66,7 +75,7 @@ export function Input({ label, tone = "light", error, className = "", id, type, 
         <input
           id={inputId}
           type={revealable && shown ? "text" : type}
-          className={`w-full rounded border ${look.field} ${error ? look.bad : look.border} ${revealable ? "pr-11" : ""} ${className}`}
+          className={`w-full rounded border ${padding} ${look.field} ${error ? look.bad : look.border} ${revealable ? "pr-11" : ""} ${className}`}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? messageId : undefined}
           {...props}

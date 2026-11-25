@@ -31,6 +31,20 @@
   --color-ok: #166534;
   --color-ok-bg: #f0fdf4;
 
+  /* Project letter tiles: four navy shades, picked by project id so a
+     project keeps its colour. White text is 5.7:1 on the lightest. */
+  --color-tile-1: #102c40;
+  --color-tile-2: #1b4560;
+  --color-tile-3: #2a5a7a;
+  --color-tile-4: #3d6b8c;
+
+  /* The progress bar on project cards, light to dark as work moves on.
+     Decoration only: the same numbers are in the text and the aria-label. */
+  --color-status-todo: #dce3e8;
+  --color-status-in-progress: #8fa6b6;
+  --color-status-in-review: #3d6b8c;
+  --color-status-done: #102c40;
+
   /* Dark surfaces: the login, register and 2FA pages. Added next to the light
      tokens rather than replacing them, so the rest of the app is untouched.
      Contrast on the card at its lightest: on-dark ~12.9:1, muted-on-dark
