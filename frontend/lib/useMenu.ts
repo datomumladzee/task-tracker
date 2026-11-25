@@ -94,5 +94,7 @@ export function useMenu() {
 // element are decided by CSS order, not by the order of the classes.
 const menuItemBase = "block w-full px-4 py-2 text-left text-sm outline-none focus-visible:text-white";
 export const menuItemClass = `${menuItemBase} text-ink hover:bg-page focus-visible:bg-navy`;
+// Red for a destructive item, with a red focus fill (white on it is 6.5:1).
+export const dangerMenuItemClass = `${menuItemBase} text-danger hover:bg-danger-bg focus-visible:bg-danger`;
 
 export const menuCardClass = "absolute top-full right-0 z-30 mt-2 overflow-hidden rounded-xl border border-line bg-card py-1 shadow-lg";

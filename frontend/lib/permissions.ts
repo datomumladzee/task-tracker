@@ -31,6 +31,10 @@ export const can = {
   // Intake confirm creates a task, so it needs standard in that project.
   useIntake: (role?: ProjectRole | null) => atLeast(role, "standard"),
 
+  // PATCH and DELETE /projects/{id}: admin.
+  editProject: (role?: ProjectRole | null) => atLeast(role, "admin"),
+  deleteProject: (role?: ProjectRole | null) => atLeast(role, "admin"),
+
   // POST and PATCH /members, and DELETE of someone else: admin.
   manageMembers: (role?: ProjectRole | null) => atLeast(role, "admin"),
   // DELETE /members/{your own id}: any member may leave.

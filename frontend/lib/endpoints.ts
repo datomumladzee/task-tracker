@@ -54,6 +54,14 @@ export const listProjects = () => request<Project[]>("GET", "/projects");
 export const createProject = (body: { name: string; description?: string | null }) =>
   request<Project>("POST", "/projects", { body });
 
+// Admin only. Send only the fields that changed; description null clears it.
+// The reply is ProjectRead, which has no role, so the caller keeps its own.
+export const updateProject = (projectId: number, body: { name?: string; description?: string | null }) =>
+  request<Omit<Project, "role">>("PATCH", `/projects/${projectId}`, { body });
+
+// Admin only. The database removes the members, tasks and comments with it.
+export const deleteProject = (projectId: number) => request<null>("DELETE", `/projects/${projectId}`);
+
 export const listMembers = (projectId: number) =>
   request<Member[]>("GET", `/projects/${projectId}/members`);
 
