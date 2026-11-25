@@ -14,6 +14,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Button } from "./ui/Button";
 import { ErrorText } from "./ui/ErrorText";
 import { Input } from "./ui/Input";
+import { TwoFactorDisable } from "./TwoFactorDisable";
 import { totpSetup, totpVerify } from "@/lib/endpoints";
 import { errorMessage } from "@/lib/errors";
 import type { TotpSetupResponse, User } from "@/lib/types";
@@ -22,7 +23,8 @@ type Props = {
   // From the logged-in user. When true, setup is not offered at all: the
   // backend refuses to replace a working secret and would answer 409.
   enabled: boolean;
-  // Called with the user verify returns, so the page shows 2FA as on.
+  // Called with the user verify or disable returns, so the page shows 2FA as
+  // on or off without another /users/me request.
   onVerified: (user: User) => void;
 };
 
@@ -75,9 +77,12 @@ export function TwoFactorSetup({ enabled, onVerified }: Props) {
       </p>
 
       {enabled ? (
-        <p className="text-sm text-muted">
-          Next time you sign in, you will be asked for a code from your authenticator app.
-        </p>
+        <>
+          <p className="text-sm text-muted">
+            Next time you sign in, you will be asked for a code from your authenticator app.
+          </p>
+          <TwoFactorDisable onDisabled={onVerified} />
+        </>
       ) : (
         <>
           <p className="rounded bg-warn-bg px-3 py-2 text-sm text-warn">

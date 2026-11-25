@@ -39,6 +39,11 @@ export const totpSetup = () => request<TotpSetupResponse>("POST", "/auth/2fa/set
 export const totpVerify = (code: string) =>
   request<User>("POST", "/auth/2fa/verify", { body: { code } });
 
+// Needs the password and a current code. Returns the user with totp_enabled
+// false. 400 "Wrong password or code" for either one, 409 if already off.
+export const totpDisable = (body: { password: string; code: string }) =>
+  request<User>("POST", "/auth/2fa/disable", { body });
+
 export const me = () => request<User>("GET", "/users/me");
 
 // --- projects ---------------------------------------------------------------

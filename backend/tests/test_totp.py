@@ -302,3 +302,104 @@ async def test_the_secret_is_in_no_response_but_setup(client: AsyncClient, regis
     # business, so members, assignees and comment authors leave it out.
     for reply in replies[3:]:
         assert "totp_enabled" not in reply.text
+
+
+# ---------------------------------------------------------------------------
+# turning it off
+# ---------------------------------------------------------------------------
+
+
+async def test_disable_turns_2fa_off_and_clears_the_secret(client: AsyncClient, enabled_2fa, db):
+    response = await client.post(
+        "/auth/2fa/disable",
+        headers=enabled_2fa.headers,
+        json={"password": "hunter2!!", "code": _code(enabled_2fa.secret)},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["totp_enabled"] is False
+    user = await get_user_by_email(db, enabled_2fa.email)
+    await db.refresh(user)
+    assert user.totp_enabled is False
+    assert user.totp_secret is None
+
+
+async def test_after_disable_login_needs_no_code(client: AsyncClient, enabled_2fa):
+    await client.post(
+        "/auth/2fa/disable",
+        headers=enabled_2fa.headers,
+        json={"password": "hunter2!!", "code": _code(enabled_2fa.secret)},
+    )
+
+    body = (await client.post(
+        "/auth/login", json={"email": enabled_2fa.email, "password": "hunter2!!"}
+    )).json()
+
+    assert body["mfa_required"] is False
+    assert body["access_token"]
+
+
+async def test_disable_with_a_wrong_password_is_400_and_stays_on(client: AsyncClient, enabled_2fa, db):
+    response = await client.post(
+        "/auth/2fa/disable",
+        headers=enabled_2fa.headers,
+        json={"password": "not-the-password", "code": _code(enabled_2fa.secret)},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Wrong password or code"
+    user = await get_user_by_email(db, enabled_2fa.email)
+    await db.refresh(user)
+    assert user.totp_enabled is True
+
+
+async def test_disable_with_a_wrong_code_is_400_with_the_same_message(client: AsyncClient, enabled_2fa):
+    right = _code(enabled_2fa.secret)
+    wrong = "000000" if right != "000000" else "111111"
+
+    response = await client.post(
+        "/auth/2fa/disable",
+        headers=enabled_2fa.headers,
+        json={"password": "hunter2!!", "code": wrong},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Wrong password or code"
+
+
+async def test_disable_when_2fa_is_off_is_409(client: AsyncClient, auth_headers):
+    headers = await auth_headers("never2fa@example.com")
+
+    response = await client.post(
+        "/auth/2fa/disable", headers=headers, json={"password": "hunter2!!", "code": "123456"}
+    )
+
+    assert response.status_code == 409
+
+
+async def test_disable_requires_authentication(client: AsyncClient):
+    response = await client.post("/auth/2fa/disable", json={"password": "hunter2!!", "code": "123456"})
+
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize("bad", ["12345", "1234567", "abcdef", ""])
+async def test_disable_rejects_malformed_codes(client: AsyncClient, enabled_2fa, bad):
+    response = await client.post(
+        "/auth/2fa/disable", headers=enabled_2fa.headers, json={"password": "hunter2!!", "code": bad}
+    )
+
+    assert response.status_code == 422
+
+
+async def test_setup_works_again_after_disable_with_a_new_secret(client: AsyncClient, enabled_2fa):
+    await client.post(
+        "/auth/2fa/disable",
+        headers=enabled_2fa.headers,
+        json={"password": "hunter2!!", "code": _code(enabled_2fa.secret)},
+    )
+
+    response = await client.post("/auth/2fa/setup", headers=enabled_2fa.headers)
+
+    assert response.status_code == 200
+    assert response.json()["secret"] != enabled_2fa.secret

@@ -11,6 +11,7 @@ from app.users.schemas import (
     LoginRequest,
     LoginResponse,
     TotpCode,
+    TotpDisableRequest,
     TotpLoginRequest,
     TotpSetupResponse,
     UserCreate,
@@ -148,6 +149,36 @@ async def totp_verify(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid code",
+        )
+
+    return user
+
+
+@router.post("/2fa/disable", response_model=UserRead)
+async def totp_disable(
+    data: TotpDisableRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """Turn 2FA off. Needs the password and a current code.
+
+    Returns the updated user, so a client sees totp_enabled turn false.
+    """
+    try:
+        ok = await service.disable_totp(db, user, data.password, data.code)
+    except service.TotpNotEnabled:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Two-factor authentication is not enabled",
+        ) from None
+
+    if not ok:
+        # 400 for the same reason as /2fa/verify: the caller is signed in and
+        # only the input was wrong. One message for both fields, so the
+        # endpoint cannot be used to test passwords on their own.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong password or code",
         )
 
     return user

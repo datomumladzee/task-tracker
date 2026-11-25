@@ -149,6 +149,34 @@ async def confirm_totp_setup(db: AsyncSession, user: User, code: str) -> bool:
     return True
 
 
+class TotpNotEnabled(Exception):
+    """2FA is off, so there is nothing to turn off."""
+
+
+async def disable_totp(db: AsyncSession, user: User, password: str, code: str) -> bool:
+    """Turn 2FA off if both the password and a current code are right.
+
+    Returns False without saying which one failed, like login. Both are always
+    checked, so a wrong password does not answer faster than a wrong code.
+
+    Clears the secret as well as the flag. Setting it up again later then
+    starts from a new secret, and the old one stops being worth anything to
+    whoever might have copied it.
+    """
+    if not user.totp_enabled or user.totp_secret is None:
+        raise TotpNotEnabled
+
+    password_ok = verify_password(password, user.hashed_password)
+    code_ok = verify_code(user.totp_secret, code)
+    if not (password_ok and code_ok):
+        return False
+
+    user.totp_enabled = False
+    user.totp_secret = None
+    await db.commit()
+    return True
+
+
 async def verify_totp_login(db: AsyncSession, user: User, code: str) -> bool:
     """Check a code during login. Changes nothing.
 

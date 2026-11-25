@@ -130,6 +130,17 @@ class TotpCode(BaseModel):
     code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
 
 
+class TotpDisableRequest(BaseModel):
+    """Turning 2FA off: the account password and a current code, both.
+
+    A live session alone is not enough. Otherwise a stolen token could strip
+    the second factor, and the code proves the authenticator is still in hand.
+    """
+
+    password: str = Field(min_length=1, max_length=128)
+    code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
+
+
 class TotpLoginRequest(BaseModel):
     """Step two of login: the pending token plus a code.
 
