@@ -50,7 +50,7 @@ export default function MembersPage() {
       </div>
     );
   }
-  if (!project || !members || !user) return <p className="text-sm text-zinc-500">Loading members...</p>;
+  if (!project || !members || !user) return <p className="text-sm text-muted">Loading members...</p>;
 
   const isAdmin = can.manageMembers(project.role);
 
@@ -63,10 +63,10 @@ export default function MembersPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Link href="/projects" className="text-sm text-zinc-500 hover:text-zinc-900">Projects</Link>
-        <span className="text-zinc-400">/</span>
-        <Link href={`/projects/${projectId}`} className="text-sm text-zinc-500 hover:text-zinc-900">{project.name}</Link>
-        <span className="text-zinc-400">/</span>
+        <Link href="/projects" className="text-sm text-muted hover:text-navy">Projects</Link>
+        <span className="text-muted">/</span>
+        <Link href={`/projects/${projectId}`} className="text-sm text-muted hover:text-navy">{project.name}</Link>
+        <span className="text-muted">/</span>
         <h1 className="text-xl font-semibold">Members</h1>
         <RoleBadge role={project.role} />
       </div>

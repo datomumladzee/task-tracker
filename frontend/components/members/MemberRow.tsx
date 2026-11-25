@@ -39,11 +39,11 @@ export function MemberRow({ projectId, member, isMe, isAdmin, lastAdmin, onChang
   }
 
   return (
-    <li className="space-y-2 rounded-lg border border-zinc-200 bg-white p-3">
+    <li className="space-y-2 rounded-lg border border-line bg-card p-3">
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className="font-medium">{member.user.full_name}{isMe && <span className="ml-1 text-sm font-normal text-zinc-500">(you)</span>}</p>
-          <p className="truncate text-sm text-zinc-500">{member.user.email}</p>
+          <p className="font-medium">{member.user.full_name}{isMe && <span className="ml-1 text-sm font-normal text-muted">(you)</span>}</p>
+          <p className="truncate text-sm text-muted">{member.user.email}</p>
         </div>
         {isAdmin ? (
           <select
@@ -52,7 +52,7 @@ export function MemberRow({ projectId, member, isMe, isAdmin, lastAdmin, onChang
             disabled={busy || lastAdmin}
             title={lastAdmin ? LAST_ADMIN_REASON : undefined}
             onChange={(e) => changeRole(e.target.value as ProjectRole)}
-            className="rounded border border-zinc-300 bg-white px-2 py-1 text-sm"
+            className="rounded border border-line bg-card px-2 py-1 text-sm"
           >
             {ROLES.map((r) => (
               <option key={r} value={r}>{r}</option>
@@ -75,8 +75,8 @@ export function MemberRow({ projectId, member, isMe, isAdmin, lastAdmin, onChang
           />
         )}
       </div>
-      {lastAdmin && isAdmin && <p className="text-xs text-zinc-500">{LAST_ADMIN_REASON}</p>}
-      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+      {lastAdmin && isAdmin && <p className="text-xs text-muted">{LAST_ADMIN_REASON}</p>}
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
     </li>
   );
 }

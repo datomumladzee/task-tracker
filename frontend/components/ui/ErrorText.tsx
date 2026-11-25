@@ -4,7 +4,7 @@
 export function ErrorText({ message }: { message: string | null }) {
   if (!message) return null;
   return (
-    <p role="alert" className="rounded bg-red-50 px-2 py-1.5 text-sm text-red-800">
+    <p role="alert" className="rounded bg-danger-bg px-2 py-1.5 text-sm text-danger">
       {message}
     </p>
   );

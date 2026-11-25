@@ -44,11 +44,10 @@ export function ConfirmButton({ label, question, yes, onConfirm, disabled, disab
     return (
       <div className="space-y-1">
         <Button
-          variant="secondary"
+          variant="danger"
           onClick={() => setAsking(true)}
           disabled={disabled}
           title={disabled ? disabledReason : undefined}
-          className="text-red-700"
         >
           {label}
         </Button>
@@ -58,13 +57,15 @@ export function ConfirmButton({ label, question, yes, onConfirm, disabled, disab
   }
 
   return (
-    <div className="space-y-2 rounded border border-red-200 bg-red-50 p-3 text-sm">
-      <p className="text-red-900">{question}</p>
+    <div className="space-y-2 rounded border border-danger/30 bg-danger-bg p-3 text-sm">
+      <p className="text-danger">{question}</p>
       <div className="flex gap-2">
-        <button type="button" onClick={go} disabled={busy} className="rounded bg-red-700 px-3 py-1.5 font-medium text-white hover:bg-red-600 disabled:opacity-50">
+        {/* Solid red only here, on the second click, where it means "this
+            really happens now". */}
+        <button type="button" onClick={go} disabled={busy} className="rounded bg-danger px-3 py-1.5 font-medium text-white hover:bg-danger/90 disabled:opacity-50">
           {busy ? "Working..." : yes}
         </button>
-        <Button variant="secondary" onClick={() => setAsking(false)} disabled={busy}>Cancel</Button>
+        <Button variant="quiet" onClick={() => setAsking(false)} disabled={busy}>Cancel</Button>
       </div>
       <ErrorText message={error} />
     </div>

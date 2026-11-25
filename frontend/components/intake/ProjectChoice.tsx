@@ -19,12 +19,12 @@ export function ProjectChoice({ resolution, projects, value, onPick }: Props) {
   return (
     <div className="space-y-2">
       <label className="block text-sm">
-        <span className="mb-1 block font-medium text-zinc-700">Project</span>
+        <span className="mb-1 block font-medium text-ink">Project</span>
         <select
           aria-label="Project"
           value={value ?? ""}
           onChange={(e) => onPick(Number(e.target.value))}
-          className="w-full rounded border border-zinc-300 bg-white px-2 py-1.5"
+          className="w-full rounded border border-line bg-card px-2 py-1.5"
         >
           {value === null && <option value="">Choose a project...</option>}
           {projects.map((p) => (

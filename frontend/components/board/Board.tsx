@@ -18,12 +18,12 @@ export function Board({ tasks, canMove, onMoved, onOpen }: Props) {
         // shows the same order the API would return.
         const cards = tasks.filter((t) => t.status === column.value).sort((a, b) => a.position - b.position);
         return (
-          <section key={column.value} className="space-y-2 rounded-lg bg-zinc-100 p-3">
-            <h2 className="flex justify-between text-sm font-semibold text-zinc-700">
+          <section key={column.value} className="space-y-2 rounded-lg border border-line bg-card p-3">
+            <h2 className="flex justify-between border-b-2 border-navy pb-1.5 text-sm font-semibold text-navy">
               {column.label}
-              <span className="font-normal text-zinc-500">{cards.length}</span>
+              <span className="font-normal text-muted">{cards.length}</span>
             </h2>
-            {cards.length === 0 && <p className="py-2 text-center text-xs text-zinc-400">No tasks</p>}
+            {cards.length === 0 && <p className="py-2 text-center text-xs text-muted">No tasks</p>}
             {cards.map((t) => (
               <TaskCard key={t.id} task={t} canMove={canMove} onMoved={onMoved} onOpen={onOpen} />
             ))}

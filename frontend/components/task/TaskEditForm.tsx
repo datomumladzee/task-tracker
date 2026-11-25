@@ -18,7 +18,7 @@ type Props = {
   onSaved: (task: Task) => void;
 };
 
-const fieldClass = "w-full rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm disabled:bg-zinc-50 disabled:text-zinc-700";
+const fieldClass = "w-full rounded border border-line bg-card px-2 py-1.5 text-sm disabled:bg-page disabled:text-muted";
 
 export function TaskEditForm({ task, members, canEdit, onSaved }: Props) {
   const [form, setForm] = useState<TaskForm>(() => formFrom(task));
@@ -55,20 +55,20 @@ export function TaskEditForm({ task, members, canEdit, onSaved }: Props) {
   return (
     <form onSubmit={save} className="space-y-3">
       <label className="block text-sm">
-        <span className="mb-1 block font-medium text-zinc-700">Title</span>
+        <span className="mb-1 block font-medium text-ink">Title</span>
         <input aria-label="Title" value={form.title} onChange={(e) => set("title", e.target.value)} maxLength={200} disabled={!canEdit} className={fieldClass} />
       </label>
       <label className="block text-sm">
-        <span className="mb-1 block font-medium text-zinc-700">Description</span>
+        <span className="mb-1 block font-medium text-ink">Description</span>
         <textarea aria-label="Description" value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} disabled={!canEdit} className={fieldClass} />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">Due date</span>
+          <span className="mb-1 block font-medium text-ink">Due date</span>
           <input aria-label="Due date" type="date" value={form.due_date} onChange={(e) => set("due_date", e.target.value)} disabled={!canEdit} className={fieldClass} />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">Priority</span>
+          <span className="mb-1 block font-medium text-ink">Priority</span>
           <select aria-label="Priority" value={form.priority} onChange={(e) => set("priority", e.target.value as TaskForm["priority"])} disabled={!canEdit} className={fieldClass}>
             {PRIORITIES.map((p) => (
               <option key={p} value={p}>{p}</option>
@@ -77,7 +77,7 @@ export function TaskEditForm({ task, members, canEdit, onSaved }: Props) {
         </label>
       </div>
       <label className="block text-sm">
-        <span className="mb-1 block font-medium text-zinc-700">Assignee</span>
+        <span className="mb-1 block font-medium text-ink">Assignee</span>
         <select aria-label="Assignee" value={form.assignee_id} onChange={(e) => set("assignee_id", e.target.value)} disabled={!canEdit} className={fieldClass}>
           <option value="">Unassigned</option>
           {members.map((m) => (
@@ -95,7 +95,7 @@ export function TaskEditForm({ task, members, canEdit, onSaved }: Props) {
       {canEdit && (
         <div className="flex items-center gap-3">
           <Button type="submit" disabled={!dirty || busy || !form.title.trim()}>{busy ? "Saving..." : "Save changes"}</Button>
-          {saved && !dirty && <span className="text-sm text-emerald-700">Saved</span>}
+          {saved && !dirty && <span className="text-sm text-ok">Saved</span>}
         </div>
       )}
     </form>

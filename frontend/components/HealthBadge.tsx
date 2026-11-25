@@ -16,9 +16,9 @@ export function HealthBadge() {
   }, []);
 
   const styles = {
-    checking: "bg-zinc-200 text-zinc-700",
-    ok: "bg-emerald-100 text-emerald-800",
-    down: "bg-red-100 text-red-800",
+    checking: "bg-line text-ink",
+    ok: "bg-ok-bg text-ok",
+    down: "bg-danger-bg text-danger",
   };
   const text = { checking: "API: checking", ok: "API: ok", down: "API: down" };
 

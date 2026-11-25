@@ -1,7 +1,47 @@
 @import "tailwindcss";
 
-/* One light theme for now. Dark mode is week 5 polish, if at all. */
+/* The app's colours, defined once. Tailwind v4 turns each --color-* below
+   into classes: --color-navy gives bg-navy, text-navy, border-navy and so on.
+   Components use these names only, never raw hex or Tailwind's zinc/red, so
+   changing a colour later is a one-line change here.
+
+   Rules (see the design decisions):
+   - lime is only ever a fill, always with navy text on it. On white it is
+     about 1.15:1, too faint for text, borders or the focus ring.
+   - lime means "the main action on this screen" or "the AI did this".
+   - solid navy is for the header bar; elsewhere navy is text or an outline. */
+@theme {
+  --color-page: #f7fafc;
+  --color-card: #ffffff;
+  --color-navy: #102c40;
+  --color-ink: #0b1f2e;
+  --color-muted: #5b6b78;
+  --color-line: #dce3e8;
+
+  --color-lime: #dbff00;
+  --color-lime-hover: #c8eb00;
+
+  --color-danger: #b91c1c;
+  --color-danger-bg: #fef2f2;
+  --color-warn: #92400e;
+  --color-warn-bg: #fffbeb;
+  /* Not in the original palette: success messages ("Saved", "Created",
+     2FA on) need a colour, and green is what people read as done. */
+  --color-ok: #166534;
+  --color-ok-bg: #f0fdf4;
+}
+
+/* One light theme for now. */
 body {
-  background: #fafafa;
-  color: #18181b;
+  background: var(--color-page);
+  color: var(--color-ink);
+}
+
+/* One focus ring for everything you can tab to: navy, 2px, with a 2px gap.
+   focus-visible shows it for the keyboard and on text fields, but not after
+   a mouse click on a button. :where() keeps its specificity at zero, so a
+   component can still override it. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-navy);
+  outline-offset: 2px;
 }

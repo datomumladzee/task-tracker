@@ -68,19 +68,19 @@ export function TwoFactorSetup({ enabled, onVerified }: Props) {
       <p className="flex items-center gap-2 text-sm">
         Status:
         {enabled ? (
-          <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-800">On</span>
+          <span className="rounded bg-ok-bg px-2 py-0.5 text-ok">On</span>
         ) : (
-          <span className="rounded bg-zinc-200 px-2 py-0.5 text-zinc-700">Off</span>
+          <span className="rounded bg-line px-2 py-0.5 text-ink">Off</span>
         )}
       </p>
 
       {enabled ? (
-        <p className="text-sm text-zinc-600">
+        <p className="text-sm text-muted">
           Your next login will ask for a code from your authenticator app.
         </p>
       ) : (
         <>
-          <p className="rounded bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          <p className="rounded bg-warn-bg px-3 py-2 text-sm text-warn">
             Running setup again before verifying replaces the secret. Any code from an earlier scan stops working, so
             delete that entry from your authenticator app and scan the new QR code.
           </p>
@@ -94,13 +94,13 @@ export function TwoFactorSetup({ enabled, onVerified }: Props) {
           {setup && (
             <div className="space-y-4">
               <div className="flex flex-wrap items-start gap-6">
-                <div className="rounded border border-zinc-200 bg-white p-3">
+                <div className="rounded border border-line bg-card p-3">
                   <QRCodeSVG value={setup.provisioning_uri} size={180} />
                 </div>
                 <div className="space-y-2 text-sm">
                   <p>1. Scan the code with an authenticator app.</p>
                   <p>Or type this secret in by hand:</p>
-                  <code className="block break-all rounded bg-zinc-100 px-2 py-1 font-mono">{setup.secret}</code>
+                  <code className="block break-all rounded bg-page px-2 py-1 font-mono">{setup.secret}</code>
                   <p>2. Enter the 6-digit code the app shows.</p>
                 </div>
               </div>

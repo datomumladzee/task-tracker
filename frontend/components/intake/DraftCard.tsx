@@ -5,6 +5,7 @@
 // draft is ready. Nothing is saved as a task until Confirm succeeds.
 
 import { useEffect, useState } from "react";
+import { AiBadge } from "../AiBadge";
 import { AssigneeChoice } from "./AssigneeChoice";
 import { ProjectChoice } from "./ProjectChoice";
 import { UnsureBanner } from "./UnsureBanner";
@@ -38,7 +39,7 @@ type Props = {
 // to parse again, a used one can only be dismissed.
 type Failure = { message: string; kind: "expired" | "used" | "other" };
 
-const fieldClass = "w-full rounded border border-zinc-300 bg-white px-2 py-1.5";
+const fieldClass = "w-full rounded border border-line bg-card px-2 py-1.5";
 
 // Each field also gets an aria-label. A <select> inside its <label> would
 // otherwise be named by the label plus the text of every option in it.
@@ -159,17 +160,17 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
   const status = edits.status ?? draft.status;
 
   return (
-    <div className="space-y-4 rounded-lg border border-zinc-300 bg-white p-4 shadow-sm">
+    <div className="space-y-4 rounded-lg border border-line bg-card p-4 shadow-sm">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="font-semibold">Draft</h3>
-        <p className="truncate text-xs text-zinc-500" title={parsed.text}>from &ldquo;{parsed.text}&rdquo;</p>
+        <h3 className="flex items-center gap-2 font-semibold"><AiBadge /> Draft</h3>
+        <p className="truncate text-xs text-muted" title={parsed.text}>from &ldquo;{parsed.text}&rdquo;</p>
       </div>
 
       <UnsureBanner project={projectOpen} assignee={assigneeOpen} />
 
       <div className="grid gap-3 md:grid-cols-2">
         <label className="block text-sm md:col-span-2">
-          <span className="mb-1 block font-medium text-zinc-700">Title</span>
+          <span className="mb-1 block font-medium text-ink">Title</span>
           <input
             aria-label="Title"
             value={title}
@@ -180,7 +181,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
         </label>
 
         <label className="block text-sm md:col-span-2">
-          <span className="mb-1 block font-medium text-zinc-700">Description</span>
+          <span className="mb-1 block font-medium text-ink">Description</span>
           <textarea
             aria-label="Description"
             value={description ?? ""}
@@ -192,7 +193,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
         </label>
 
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">Due date</span>
+          <span className="mb-1 block font-medium text-ink">Due date</span>
           <input
             aria-label="Due date"
             type="date"
@@ -203,7 +204,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
         </label>
 
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">Priority</span>
+          <span className="mb-1 block font-medium text-ink">Priority</span>
           <select
             aria-label="Priority"
             value={priority ?? ""}
@@ -220,7 +221,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
         </label>
 
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">Status</span>
+          <span className="mb-1 block font-medium text-ink">Status</span>
           <select
             aria-label="Status"
             value={status ?? ""}
@@ -259,7 +260,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
         </Button>
         <Button variant="secondary" onClick={onDiscard} disabled={busy}>Discard</Button>
       </div>
-      {!ready && <p className="text-xs text-zinc-500">Answer the questions above to enable Confirm.</p>}
+      {!ready && <p className="text-xs text-muted">Answer the questions above to enable Confirm.</p>}
     </div>
   );
 }

@@ -6,9 +6,10 @@ type Props = React.InputHTMLAttributes<HTMLInputElement> & { label: string };
 export function Input({ label, className = "", ...props }: Props) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 block font-medium text-zinc-700">{label}</span>
+      <span className="mb-1 block font-medium text-ink">{label}</span>
+      {/* No outline-none: the global navy focus ring shows on focus. */}
       <input
-        className={`w-full rounded border border-zinc-300 bg-white px-2 py-1.5 outline-none focus:border-zinc-900 ${className}`}
+        className={`w-full rounded border border-line bg-card px-2 py-1.5 focus:border-navy ${className}`}
         {...props}
       />
     </label>

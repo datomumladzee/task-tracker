@@ -15,5 +15,5 @@ export default function Home() {
     if (status === "out") router.replace("/login");
   }, [status, router]);
 
-  return <p className="p-8 text-sm text-zinc-500">Loading...</p>;
+  return <p className="p-8 text-sm text-muted">Loading...</p>;
 }

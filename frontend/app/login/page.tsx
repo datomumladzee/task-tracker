@@ -87,7 +87,7 @@ export default function LoginPage() {
     return (
       <AuthCard title="Two-factor code">
         <form onSubmit={submitCode} className="space-y-3">
-          <p className="text-sm text-zinc-600">Enter the 6-digit code from your authenticator app.</p>
+          <p className="text-sm text-muted">Enter the 6-digit code from your authenticator app.</p>
           <Input
             label="Code"
             value={code}
@@ -101,7 +101,7 @@ export default function LoginPage() {
           <Button type="submit" disabled={busy || code.length !== 6} className="w-full">
             Verify
           </Button>
-          <button type="button" onClick={startOver} className="w-full text-sm text-zinc-600 underline">
+          <button type="button" onClick={startOver} className="w-full text-sm text-muted underline">
             Start over
           </button>
         </form>
@@ -118,7 +118,7 @@ export default function LoginPage() {
         <Button type="submit" disabled={busy} className="w-full">
           {busy ? "Logging in..." : "Log in"}
         </Button>
-        <p className="text-center text-sm text-zinc-600">
+        <p className="text-center text-sm text-muted">
           No account? <Link href="/register" className="underline">Register</Link>
         </p>
       </form>

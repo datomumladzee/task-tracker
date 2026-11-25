@@ -18,6 +18,6 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     if (status === "out") router.replace("/login");
   }, [status, router]);
 
-  if (status !== "in") return <p className="p-8 text-sm text-zinc-500">Loading...</p>;
+  if (status !== "in") return <p className="p-8 text-sm text-muted">Loading...</p>;
   return <>{children}</>;
 }

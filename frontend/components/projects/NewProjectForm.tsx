@@ -34,7 +34,7 @@ export function NewProjectForm({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-lg border border-zinc-200 bg-white p-4">
+    <form onSubmit={submit} className="space-y-3 rounded-lg border border-line bg-card p-4">
       <h2 className="font-semibold">New project</h2>
       <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} maxLength={200} required />
       <Input label="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} />

@@ -10,9 +10,9 @@ import { errorMessage } from "@/lib/errors";
 import { STATUSES, type Task, type TaskStatus } from "@/lib/types";
 
 const priorityLook = {
-  low: "text-zinc-500",
-  medium: "text-amber-700",
-  high: "text-red-700",
+  low: "text-muted",
+  medium: "text-warn",
+  high: "text-danger",
 };
 
 type Props = {
@@ -42,11 +42,11 @@ export function TaskCard({ task, canMove, onMoved, onOpen }: Props) {
   }
 
   return (
-    <article className="space-y-2 rounded border border-zinc-200 bg-white p-3 text-sm shadow-sm">
+    <article className="space-y-2 rounded border border-line bg-card p-3 text-sm shadow-sm">
       <button type="button" onClick={() => onOpen(task)} className="block w-full text-left font-medium hover:underline">
         {task.title}
       </button>
-      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-600">
+      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
         <span className={priorityLook[task.priority]}>{task.priority}</span>
         {task.due_date && <span>due {task.due_date}</span>}
         <span>{task.assignee ? task.assignee.full_name : "unassigned"}</span>
@@ -57,15 +57,15 @@ export function TaskCard({ task, canMove, onMoved, onOpen }: Props) {
           value={task.status}
           disabled={busy}
           onChange={(e) => changeStatus(e.target.value as TaskStatus)}
-          className="w-full rounded border border-zinc-300 bg-white px-1 py-1 text-xs"
+          className="w-full rounded border border-line bg-card px-1 py-1 text-xs"
         >
           {STATUSES.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
       )}
-      {busy && <p className="text-xs text-zinc-500">Moving...</p>}
-      {error && <p role="alert" className="text-xs text-red-700">{error}</p>}
+      {busy && <p className="text-xs text-muted">Moving...</p>}
+      {error && <p role="alert" className="text-xs text-danger">{error}</p>}
     </article>
   );
 }

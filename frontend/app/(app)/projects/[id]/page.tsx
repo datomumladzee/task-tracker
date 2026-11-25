@@ -73,15 +73,15 @@ export default function ProjectPage() {
       </div>
     );
   }
-  if (!tasks || !project || !role) return <p className="text-sm text-zinc-500">Loading board...</p>;
+  if (!tasks || !project || !role) return <p className="text-sm text-muted">Loading board...</p>;
 
   const open = tasks.find((t) => t.id === openId) ?? null;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Link href="/projects" className="text-sm text-zinc-500 hover:text-zinc-900">Projects</Link>
-        <span className="text-zinc-400">/</span>
+        <Link href="/projects" className="text-sm text-muted hover:text-navy">Projects</Link>
+        <span className="text-muted">/</span>
         <h1 className="text-xl font-semibold">{project.name}</h1>
         <RoleBadge role={role} />
         <Link href={`/projects/${projectId}/members`} className="ml-auto text-sm underline">
@@ -92,12 +92,12 @@ export default function ProjectPage() {
       {can.useIntake(role) && <IntakeBox projects={projects} currentProjectId={projectId} onCreated={upsert} />}
       {can.createTask(role) && <NewTaskForm projectId={projectId} onCreated={upsert} />}
       {role === "viewer" && (
-        <p className="rounded bg-zinc-100 px-3 py-2 text-sm text-zinc-600">
+        <p className="rounded bg-page px-3 py-2 text-sm text-muted">
           You can view this project. Ask an admin for the standard role to add or change tasks.
         </p>
       )}
       {tasks.length === 0 && can.createTask(role) && (
-        <p className="text-sm text-zinc-500">No tasks yet. Describe one above, or add one by title.</p>
+        <p className="text-sm text-muted">No tasks yet. Describe one above, or add one by title.</p>
       )}
 
       <Board tasks={tasks} canMove={can.moveTask(role)} onMoved={upsert} onOpen={(t) => setOpenId(t.id)} />

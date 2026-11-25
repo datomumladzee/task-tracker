@@ -36,8 +36,8 @@ export function AssigneeChoice({ resolution, members, projectChosen, answer, onP
   if (members === null) {
     return (
       <div className="text-sm">
-        <span className="mb-1 block font-medium text-zinc-700">Assignee</span>
-        <p className="text-zinc-500">
+        <span className="mb-1 block font-medium text-ink">Assignee</span>
+        <p className="text-muted">
           {projectChosen
             ? "Loading members..."
             : resolution.ref
@@ -51,12 +51,12 @@ export function AssigneeChoice({ resolution, members, projectChosen, answer, onP
   return (
     <div className="space-y-2">
       <label className="block text-sm">
-        <span className="mb-1 block font-medium text-zinc-700">Assignee</span>
+        <span className="mb-1 block font-medium text-ink">Assignee</span>
         <select
           aria-label="Assignee"
           value={value}
           onChange={(e) => onPick(e.target.value === "none" ? null : Number(e.target.value))}
-          className="w-full rounded border border-zinc-300 bg-white px-2 py-1.5"
+          className="w-full rounded border border-line bg-card px-2 py-1.5"
         >
           {value === "" && <option value="">{resolution.ref ? `"${resolution.ref}", checked on confirm` : "Choose..."}</option>}
           <option value="none">Unassigned</option>
@@ -68,7 +68,7 @@ export function AssigneeChoice({ resolution, members, projectChosen, answer, onP
       {unsure && (
         <>
           <Question question={resolution.question} candidates={resolution.candidates} onPick={onPick} />
-          <button type="button" onClick={() => onPick(null)} className="text-sm text-zinc-600 underline">
+          <button type="button" onClick={() => onPick(null)} className="text-sm text-muted underline">
             Leave unassigned
           </button>
         </>

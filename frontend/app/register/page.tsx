@@ -53,7 +53,7 @@ export default function RegisterPage() {
         <Button type="submit" disabled={busy} className="w-full">
           {busy ? "Creating..." : "Create account"}
         </Button>
-        <p className="text-center text-sm text-zinc-600">
+        <p className="text-center text-sm text-muted">
           Have an account? <Link href="/login" className="underline">Log in</Link>
         </p>
       </form>

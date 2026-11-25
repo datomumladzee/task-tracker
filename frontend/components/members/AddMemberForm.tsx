@@ -34,13 +34,13 @@ export function AddMemberForm({ projectId, onAdded }: { projectId: number; onAdd
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-lg border border-zinc-200 bg-white p-4">
+    <form onSubmit={submit} className="space-y-3 rounded-lg border border-line bg-card p-4">
       <h2 className="font-semibold">Add a person</h2>
-      <p className="text-xs text-zinc-500">They need an account already. Adding does not send an invite.</p>
+      <p className="text-xs text-muted">They need an account already. Adding does not send an invite.</p>
       <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
       <label className="block text-sm">
-        <span className="mb-1 block font-medium text-zinc-700">Role</span>
-        <select aria-label="Role" value={role} onChange={(e) => setRole(e.target.value as ProjectRole)} className="w-full rounded border border-zinc-300 bg-white px-2 py-1.5">
+        <span className="mb-1 block font-medium text-ink">Role</span>
+        <select aria-label="Role" value={role} onChange={(e) => setRole(e.target.value as ProjectRole)} className="w-full rounded border border-line bg-card px-2 py-1.5">
           {ROLES.map((r) => (
             <option key={r} value={r}>{r}</option>
           ))}
