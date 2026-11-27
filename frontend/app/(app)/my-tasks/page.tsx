@@ -100,7 +100,7 @@ function MyTasks() {
 
       <ErrorText message={error} />
 
-      {(projects === null || (items.length === 0 && !settled)) && !error && (
+      {view === "list" && (projects === null || (items.length === 0 && !settled)) && !error && (
         <div className="space-y-3" aria-hidden="true">
           {[0, 1, 2].map((i) => (
             <div key={i} className="h-16 rounded-xl border border-line bg-card motion-safe:animate-pulse" />
@@ -108,15 +108,21 @@ function MyTasks() {
         </div>
       )}
 
-      {settled && items.length === 0 && !error && (
+      {view === "list" && settled && items.length === 0 && !error && (
         <div className="rounded-xl border border-dashed border-line bg-card px-6 py-10 text-center">
           <h2 className="font-brand text-lg font-semibold text-ink">Nothing assigned to you</h2>
           <p className="mt-1 text-sm text-muted">Tasks you are assigned show up here, from every project you are in.</p>
         </div>
       )}
 
-      {view === "calendar" && items.length > 0 && (
-        <TaskCalendar items={items} today={today} onShowList={() => setView("list")} />
+      {/* The calendar is always there, even before tasks load or when none
+          are yours: today, the month and the arrows are useful by themselves.
+          Tasks appear in it as each project answers. */}
+      {view === "calendar" && (
+        <div className="space-y-3">
+          {settled && items.length === 0 && !error && <p className="text-sm text-muted">No tasks assigned to you yet.</p>}
+          <TaskCalendar items={items} today={today} onShowList={() => setView("list")} />
+        </div>
       )}
 
       {view === "list" && GROUPS.map(({ key, label }) => {
