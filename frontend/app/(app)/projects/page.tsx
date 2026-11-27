@@ -58,27 +58,36 @@ export default function ProjectsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        {/* Title and chips on the left, New project on the right, on one
-            centre line. On phones the button drops below, full width. */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <h1 className="font-brand text-3xl font-semibold text-ink">Projects</h1>
-            {projects && projects.length > 0 && (
-              <>
-                <span className="rounded-full border border-line bg-card px-3 py-1 text-sm font-medium text-ink">
-                  {counts.all} {counts.all === 1 ? "project" : "projects"}
-                </span>
-                {counts.admin > 0 && (
-                  <span className="rounded-full bg-navy/10 px-3 py-1 text-sm font-medium text-navy">Admin on {counts.admin}</span>
-                )}
-              </>
-            )}
-          </div>
+        {/* Title, chips and New project in one row, all on the title's centre
+            line; ml-auto pushes the button to the right edge, which is the
+            stat cards' right edge too. On phones it wraps below, full width. */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
+          <h1 className="font-brand text-3xl font-semibold text-ink">Projects</h1>
+          {projects && projects.length > 0 && (
+            <>
+              <span className="rounded-full border border-line bg-card px-3 py-1 text-sm font-medium text-ink">
+                {counts.all} {counts.all === 1 ? "project" : "projects"}
+              </span>
+              {counts.admin > 0 && (
+                <span className="rounded-full bg-navy/10 px-3 py-1 text-sm font-medium text-navy">Admin on {counts.admin}</span>
+              )}
+            </>
+          )}
           {!formOpen && projects && projects.length > 0 && (
-            <Button id={NEW_BUTTON_ID} size="lg" onClick={() => setFormOpen(true)} className="flex w-full items-center justify-center gap-2 sm:w-auto">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
+            // The page's main call to action: the cta look, with the plus in a
+            // navy circle so it reads as the button's symbol.
+            <Button
+              id={NEW_BUTTON_ID}
+              variant="cta"
+              size="xl"
+              onClick={() => setFormOpen(true)}
+              className="flex w-full items-center justify-center gap-2.5 sm:ml-auto sm:w-auto"
+            >
+              <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center rounded-full bg-navy text-lime">
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </span>
               New project
             </Button>
           )}
@@ -116,7 +125,12 @@ export default function ProjectsPage() {
             A project holds a board of tasks. Create one, then describe your first task in a sentence and the AI
             drafts it for you.
           </p>
-          <Button id={NEW_BUTTON_ID} size="lg" onClick={() => setFormOpen(true)}>
+          <Button id={NEW_BUTTON_ID} variant="cta" size="xl" onClick={() => setFormOpen(true)} className="inline-flex items-center gap-2.5">
+            <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center rounded-full bg-navy text-lime">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+              </span>
             New project
           </Button>
         </div>

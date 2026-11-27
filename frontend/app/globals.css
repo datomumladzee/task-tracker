@@ -21,6 +21,8 @@
 
   --color-lime: #dbff00;
   --color-lime-hover: #c8eb00;
+  /* Pressed lime, for the call-to-action button. Navy on it is about 8.7:1. */
+  --color-lime-press: #b5d000;
 
   --color-danger: #b91c1c;
   --color-danger-bg: #fef2f2;
