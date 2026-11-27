@@ -10,6 +10,7 @@
 //   unknown    nobody matched: the question, pick someone or leave it empty
 
 import { Question } from "./Question";
+import { Select } from "../ui/Select";
 import type { Member, Resolution } from "@/lib/types";
 
 type Props = {
@@ -52,18 +53,18 @@ export function AssigneeChoice({ resolution, members, projectChosen, answer, onP
     <div className="space-y-2">
       <label className="block text-sm">
         <span className="mb-1 block font-medium text-ink">Assignee</span>
-        <select
+        <Select
           aria-label="Assignee"
+          fullWidth
           value={value}
-          onChange={(e) => onPick(e.target.value === "none" ? null : Number(e.target.value))}
-          className="w-full rounded border border-line bg-card px-2 py-1.5"
-        >
-          {value === "" && <option value="">{resolution.ref ? `"${resolution.ref}", checked on confirm` : "Choose..."}</option>}
-          <option value="none">Unassigned</option>
-          {members.map((m) => (
-            <option key={m.user.id} value={m.user.id}>{m.user.full_name} ({m.user.email})</option>
-          ))}
-        </select>
+          onChange={(v) => onPick(v === "none" ? null : Number(v))}
+          // While nothing is picked: what the sentence said, or "Choose...".
+          placeholder={resolution.ref ? `"${resolution.ref}", checked on confirm` : "Choose..."}
+          options={[
+            { value: "none", label: "Unassigned" },
+            ...members.map((m) => ({ value: String(m.user.id), label: `${m.user.full_name} (${m.user.email})` })),
+          ]}
+        />
       </label>
       {unsure && (
         <>

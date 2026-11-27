@@ -5,12 +5,11 @@
 
 import Link from "next/link";
 import { LetterTile } from "../projects/LetterTile";
+import { StatusBadge } from "../status/Status";
 import { dueLabel, type MyTask } from "@/lib/projectStats";
-import { STATUSES } from "@/lib/types";
 
 export function MyTaskRow({ item, today, overdue }: { item: MyTask; today: string; overdue: boolean }) {
   const { task, project } = item;
-  const status = STATUSES.find((s) => s.value === task.status)?.label ?? task.status;
 
   return (
     <Link
@@ -23,7 +22,7 @@ export function MyTaskRow({ item, today, overdue }: { item: MyTask; today: strin
           <LetterTile id={project.id} name={project.name} size="sm" />
           <span className="truncate">{project.name}</span>
           <span aria-hidden="true">·</span>
-          <span className="shrink-0">{status}</span>
+          <StatusBadge status={task.status} size="sm" />
         </p>
       </div>
       {task.due_date && (

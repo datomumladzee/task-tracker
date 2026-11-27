@@ -38,12 +38,25 @@
   --color-tile-3: #2a5a7a;
   --color-tile-4: #3d6b8c;
 
-  /* The progress bar on project cards, light to dark as work moves on.
-     Decoration only: the same numbers are in the text and the aria-label. */
-  --color-status-todo: #dce3e8;
-  --color-status-in-progress: #8fa6b6;
-  --color-status-in-review: #3d6b8c;
-  --color-status-done: #102c40;
+  /* Task statuses, used everywhere a status shows: board column headers,
+     the status dropdown on task cards, the task panel, My tasks, the AI
+     draft card and the progress bar on project cards. Three shades each:
+       status-X       the line and icon colour
+       status-X-text  text on the tint, 4.8:1 (done) to 7:1 or better
+       status-X-bg    the light tint behind pills and counts
+     Lime is never a status colour: it stays for buttons and the AI. */
+  --color-status-todo: #64748b;
+  --color-status-todo-text: #475569;
+  --color-status-todo-bg: #f1f5f9;
+  --color-status-in-progress: #2563eb;
+  --color-status-in-progress-text: #1d4ed8;
+  --color-status-in-progress-bg: #eff6ff;
+  --color-status-in-review: #d97706;
+  --color-status-in-review-text: #92400e;
+  --color-status-in-review-bg: #fffbeb;
+  --color-status-done: #16a34a;
+  --color-status-done-text: #15803d;
+  --color-status-done-bg: #f0fdf4;
 
   /* Dark surfaces: the login, register and 2FA pages. Added next to the light
      tokens rather than replacing them, so the rest of the app is untouched.

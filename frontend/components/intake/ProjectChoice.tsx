@@ -4,6 +4,7 @@
 // Ambiguous or unknown: the resolver's question and candidates, plus the same
 // dropdown, since "unknown" may have no candidates at all.
 
+import { Select } from "../ui/Select";
 import { Question } from "./Question";
 import type { Project, Resolution } from "@/lib/types";
 
@@ -20,21 +21,20 @@ export function ProjectChoice({ resolution, projects, value, onPick }: Props) {
     <div className="space-y-2">
       <label className="block text-sm">
         <span className="mb-1 block font-medium text-ink">Project</span>
-        <select
+        <Select
           aria-label="Project"
-          value={value ?? ""}
-          onChange={(e) => onPick(Number(e.target.value))}
-          className="w-full rounded border border-line bg-card px-2 py-1.5"
-        >
-          {value === null && <option value="">Choose a project...</option>}
-          {projects.map((p) => (
-            // Viewers cannot create tasks, so confirm would answer 403. Shown
-            // but disabled, so the user sees why the project is not usable.
-            <option key={p.id} value={p.id} disabled={p.role === "viewer"}>
-              {p.name}{p.role === "viewer" ? " (view only)" : ""}
-            </option>
-          ))}
-        </select>
+          fullWidth
+          value={value === null ? "" : String(value)}
+          onChange={(v) => onPick(Number(v))}
+          placeholder="Choose a project..."
+          // Viewers cannot create tasks, so confirm would answer 403. Shown
+          // but disabled, so the user sees why the project is not usable.
+          options={projects.map((p) => ({
+            value: String(p.id),
+            label: `${p.name}${p.role === "viewer" ? " (view only)" : ""}`,
+            disabled: p.role === "viewer",
+          }))}
+        />
       </label>
       {value === null && <Question question={resolution.question} candidates={resolution.candidates} onPick={onPick} />}
     </div>

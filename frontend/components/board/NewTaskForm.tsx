@@ -5,6 +5,8 @@
 
 import { useState } from "react";
 import { Button } from "../ui/Button";
+import { PriorityBars } from "../ui/PriorityBars";
+import { Select } from "../ui/Select";
 import { ErrorText } from "../ui/ErrorText";
 import { createTask } from "@/lib/endpoints";
 import { errorMessage } from "@/lib/errors";
@@ -14,6 +16,12 @@ type Props = {
   projectId: number;
   onCreated: (task: Task) => void;
 };
+
+const priorityOptions = PRIORITIES.map((p) => ({
+  value: p,
+  label: p,
+  icon: <PriorityBars priority={p} className={`h-3.5 w-3.5 ${p === "high" ? "text-danger" : ""}`} />,
+}));
 
 export function NewTaskForm({ projectId, onCreated }: Props) {
   const [title, setTitle] = useState("");
@@ -46,18 +54,19 @@ export function NewTaskForm({ projectId, onCreated }: Props) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
-          className="flex-1 rounded border border-line bg-card px-2 py-1.5 text-sm"
+          // min-w-0: an input has a built-in minimum width, which pushed the
+          // Add button 3px off a 375px screen.
+          className="min-w-0 flex-1 rounded border border-line bg-card px-2 py-1.5 text-sm placeholder:text-muted hover:border-muted/50 focus:border-navy"
         />
-        <select
+        {/* The shared dropdown, the same height as the title field, with
+            the priority bars from the task cards; red only for high. */}
+        <Select
           aria-label="Priority"
           value={priority}
-          onChange={(e) => setPriority(e.target.value as TaskPriority)}
-          className="rounded border border-line bg-card px-2 text-sm"
-        >
-          {PRIORITIES.map((p) => (
-            <option key={p} value={p}>{p}</option>
-          ))}
-        </select>
+          onChange={(v) => setPriority(v as TaskPriority)}
+          options={priorityOptions}
+          look={priority === "high" ? "rounded border border-danger/40 bg-danger-bg text-danger" : undefined}
+        />
         <Button type="submit" variant="secondary" disabled={busy || !title.trim()}>Add</Button>
       </div>
       <ErrorText message={error} />

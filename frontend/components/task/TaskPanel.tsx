@@ -5,11 +5,12 @@
 // every change shows up on it straight away. Escape or the backdrop closes it.
 
 import { useEffect } from "react";
+import { StatusBadge } from "../status/Status";
 import { Comments } from "./Comments";
 import { DeleteTaskButton } from "./DeleteTaskButton";
 import { TaskEditForm } from "./TaskEditForm";
 import { can } from "@/lib/permissions";
-import { STATUSES, type Member, type ProjectRole, type Task } from "@/lib/types";
+import type { Member, ProjectRole, Task } from "@/lib/types";
 
 type Props = {
   task: Task;
@@ -28,14 +29,12 @@ export function TaskPanel({ task, role, members, currentUserId, onSaved, onDelet
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const status = STATUSES.find((s) => s.value === task.status)?.label;
-
   return (
     <div className="fixed inset-0 z-20 flex justify-end">
       <button type="button" aria-label="Close task" onClick={onClose} className="absolute inset-0 bg-ink/30" />
       <aside role="dialog" aria-modal="true" aria-label={`Task: ${task.title}`} className="relative h-full w-full max-w-md space-y-6 overflow-y-auto bg-card p-5 shadow-xl">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted">{status}</span>
+          <StatusBadge status={task.status} />
           <button type="button" onClick={onClose} className="text-sm text-muted hover:text-navy">Close</button>
         </div>
         {/* key: a different task gets a fresh form, not the last one's edits. */}

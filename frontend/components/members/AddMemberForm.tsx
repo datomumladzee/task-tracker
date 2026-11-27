@@ -4,6 +4,7 @@
 // The backend answers 404 when no active account has that email, and 409
 // when the person is already in; both messages are shown as they come.
 
+import { Select } from "../ui/Select";
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { ErrorText } from "../ui/ErrorText";
@@ -40,11 +41,13 @@ export function AddMemberForm({ projectId, onAdded }: { projectId: number; onAdd
       <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
       <label className="block text-sm">
         <span className="mb-1 block font-medium text-ink">Role</span>
-        <select aria-label="Role" value={role} onChange={(e) => setRole(e.target.value as ProjectRole)} className="w-full rounded border border-line bg-card px-2 py-1.5">
-          {ROLES.map((r) => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
+        <Select
+          aria-label="Role"
+          fullWidth
+          value={role}
+          onChange={(v) => setRole(v as ProjectRole)}
+          options={ROLES.map((r) => ({ value: r, label: r }))}
+        />
       </label>
       <ErrorText message={error} />
       <Button type="submit" disabled={busy || !email.trim()}>{busy ? "Adding..." : "Add member"}</Button>

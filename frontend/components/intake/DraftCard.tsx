@@ -7,6 +7,8 @@
 import { useEffect, useState } from "react";
 import { AiBadge } from "../AiBadge";
 import { AssigneeChoice } from "./AssigneeChoice";
+import { StatusIcon, statusStyle } from "../status/Status";
+import { Select } from "../ui/Select";
 import { ProjectChoice } from "./ProjectChoice";
 import { UnsureBanner } from "./UnsureBanner";
 import { Button } from "../ui/Button";
@@ -205,34 +207,39 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
 
         <label className="block text-sm">
           <span className="mb-1 block font-medium text-ink">Priority</span>
-          <select
+          <Select
             aria-label="Priority"
+            fullWidth
             value={priority ?? ""}
             // "" is the draft's own null. Confirm rejects an explicit null
             // priority, so choosing it removes the edit instead.
-            onChange={(e) => edit("priority", (e.target.value || undefined) as DraftEdits["priority"], draft.priority)}
-            className={fieldClass}
-          >
-            {draft.priority === null && <option value="">Not said (medium)</option>}
-            {PRIORITIES.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </select>
+            onChange={(v) => edit("priority", (v || undefined) as DraftEdits["priority"], draft.priority)}
+            options={[
+              ...(draft.priority === null ? [{ value: "", label: "Not said (medium)" }] : []),
+              ...PRIORITIES.map((p) => ({ value: p, label: p })),
+            ]}
+          />
         </label>
 
         <label className="block text-sm">
           <span className="mb-1 block font-medium text-ink">Status</span>
-          <select
+          <Select
             aria-label="Status"
+            fullWidth
             value={status ?? ""}
-            onChange={(e) => edit("status", (e.target.value || undefined) as DraftEdits["status"], draft.status)}
-            className={fieldClass}
-          >
-            {draft.status === null && <option value="">Not said (to do)</option>}
-            {STATUSES.map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
+            onChange={(v) => edit("status", (v || undefined) as DraftEdits["status"], draft.status)}
+            options={[
+              ...(draft.status === null ? [{ value: "", label: "Not said (to do)" }] : []),
+              ...STATUSES.map((st) => ({
+                value: st.value,
+                label: st.label,
+                icon: <StatusIcon status={st.value} className={`h-3.5 w-3.5 ${statusStyle[st.value].icon}`} />,
+              })),
+            ]}
+            // Tinted like everywhere else once a status is chosen; "Not
+            // said" stays plain.
+            look={status ? `rounded border ${statusStyle[status].bg} ${statusStyle[status].text} ${statusStyle[status].fieldBorder}` : undefined}
+          />
         </label>
 
         <ProjectChoice resolution={projectRes} projects={projects} value={projectId} onPick={pickProject} />

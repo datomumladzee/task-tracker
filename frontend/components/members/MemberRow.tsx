@@ -4,6 +4,7 @@
 // may leave. The last admin's controls are disabled with the reason, since
 // the backend would refuse them with 409.
 
+import { Select } from "../ui/Select";
 import { useState } from "react";
 import { RoleBadge } from "../RoleBadge";
 import { ConfirmButton } from "../ui/ConfirmButton";
@@ -46,18 +47,14 @@ export function MemberRow({ projectId, member, isMe, isAdmin, lastAdmin, onChang
           <p className="truncate text-sm text-muted">{member.user.email}</p>
         </div>
         {isAdmin ? (
-          <select
+          <Select
             aria-label={`Role for ${member.user.full_name}`}
             value={member.role}
             disabled={busy || lastAdmin}
             title={lastAdmin ? LAST_ADMIN_REASON : undefined}
-            onChange={(e) => changeRole(e.target.value as ProjectRole)}
-            className="rounded border border-line bg-card px-2 py-1 text-sm"
-          >
-            {ROLES.map((r) => (
-              <option key={r} value={r}>{r}</option>
-            ))}
-          </select>
+            onChange={(v) => changeRole(v as ProjectRole)}
+            options={ROLES.map((r) => ({ value: r, label: r }))}
+          />
         ) : (
           <RoleBadge role={member.role} />
         )}

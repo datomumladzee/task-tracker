@@ -3,6 +3,7 @@
 // The task's fields. Editable for standard and admin, read-only for viewers,
 // who may see a task but not change it.
 
+import { Select } from "../ui/Select";
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { ErrorText } from "../ui/ErrorText";
@@ -69,27 +70,35 @@ export function TaskEditForm({ task, members, canEdit, onSaved }: Props) {
         </label>
         <label className="block text-sm">
           <span className="mb-1 block font-medium text-ink">Priority</span>
-          <select aria-label="Priority" value={form.priority} onChange={(e) => set("priority", e.target.value as TaskForm["priority"])} disabled={!canEdit} className={fieldClass}>
-            {PRIORITIES.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </select>
+          <Select
+            aria-label="Priority"
+            fullWidth
+            value={form.priority}
+            onChange={(v) => set("priority", v as TaskForm["priority"])}
+            disabled={!canEdit}
+            options={PRIORITIES.map((p) => ({ value: p, label: p }))}
+          />
         </label>
       </div>
       <label className="block text-sm">
         <span className="mb-1 block font-medium text-ink">Assignee</span>
-        <select aria-label="Assignee" value={form.assignee_id} onChange={(e) => set("assignee_id", e.target.value)} disabled={!canEdit} className={fieldClass}>
-          <option value="">Unassigned</option>
-          {members.map((m) => (
-            <option key={m.user.id} value={m.user.id}>{m.user.full_name}</option>
-          ))}
-          {/* Someone who left the project can still be the assignee. Keep
-              them selectable, or the dropdown would silently show the wrong
-              person. */}
-          {task.assignee && !members.some((m) => m.user.id === task.assignee!.id) && (
-            <option value={task.assignee.id}>{task.assignee.full_name} (not a member)</option>
-          )}
-        </select>
+        <Select
+          aria-label="Assignee"
+          fullWidth
+          value={form.assignee_id}
+          onChange={(v) => set("assignee_id", v)}
+          disabled={!canEdit}
+          options={[
+            { value: "", label: "Unassigned" },
+            ...members.map((m) => ({ value: String(m.user.id), label: m.user.full_name })),
+            // Someone who left the project can still be the assignee. Keep
+            // them selectable, or the dropdown would silently show the
+            // wrong person.
+            ...(task.assignee && !members.some((m) => m.user.id === task.assignee!.id)
+              ? [{ value: String(task.assignee.id), label: `${task.assignee.full_name} (not a member)` }]
+              : []),
+          ]}
+        />
       </label>
       <ErrorText message={error} />
       {canEdit && (
