@@ -81,9 +81,12 @@ export default function ProjectsPage() {
               variant="cta"
               size="xl"
               onClick={() => setFormOpen(true)}
-              className="flex w-full items-center justify-center gap-2.5 sm:ml-auto sm:w-auto"
+              // From 640px up: 12px in from the right edge and 6px below the
+              // title's centre line (relative top, so the hover lift still
+              // works on top of it).
+              className="flex w-full items-center justify-center gap-2.5 sm:relative sm:top-12 sm:mr-11 sm:ml-auto sm:w-auto"
             >
-              <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center rounded-full bg-navy text-lime">
+              <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center rounded-full bg-navy text-lime transition-transform duration-200 motion-safe:group-hover:rotate-90">
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
                   <path d="M12 5v14M5 12h14" />
                 </svg>
@@ -126,7 +129,7 @@ export default function ProjectsPage() {
             drafts it for you.
           </p>
           <Button id={NEW_BUTTON_ID} variant="cta" size="xl" onClick={() => setFormOpen(true)} className="inline-flex items-center gap-2.5">
-            <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center rounded-full bg-navy text-lime">
+            <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center rounded-full bg-navy text-lime transition-transform duration-200 motion-safe:group-hover:rotate-90">
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
               <path d="M12 5v14M5 12h14" />
             </svg>

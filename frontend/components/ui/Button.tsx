@@ -28,17 +28,20 @@ const looks: Record<Variant, string> = {
   secondary: "border border-navy bg-card font-medium text-navy hover:bg-navy/5",
   danger: "border border-danger bg-card font-medium text-danger hover:bg-danger-bg",
   quiet: "font-medium text-muted hover:text-navy",
-  // The page's main call to action (New project). A soft glow in a darker
-  // lime, since pure lime barely shows on the near-white page; a 2px lift
-  // and a darker lime on hover; settles back and darkens again when pressed.
-  // The lift is skipped for people who prefer reduced motion.
-  cta: "border border-transparent bg-lime font-semibold text-navy shadow-[0_8px_22px_-8px_rgb(132_160_0/0.75)] transition-[translate,box-shadow,background-color] duration-150 hover:bg-lime-hover hover:shadow-[0_12px_28px_-8px_rgb(132_160_0/0.85)] motion-safe:hover:-translate-y-0.5 active:bg-lime-press active:shadow-[0_4px_12px_-6px_rgb(132_160_0/0.7)] motion-safe:active:translate-y-0",
+  // The page's main call to action (New project). The lime never changes
+  // colour; hover and press are movement and light instead. Hover: a 2px
+  // lift and a bigger glow (and, via "group", a quarter turn of the plus
+  // icon the page puts inside). Press: shrinks to 98% with a tighter glow,
+  // so it feels pushed in. Movement is skipped for reduced motion; the glow
+  // still changes. The glow is a darker lime, since pure lime barely shows
+  // on the near-white page.
+  cta: "group border border-transparent bg-lime font-semibold text-navy shadow-[0_8px_22px_-8px_rgb(132_160_0/0.75)] transition-[translate,scale,box-shadow] duration-150 hover:shadow-[0_14px_30px_-8px_rgb(132_160_0/0.9)] motion-safe:hover:-translate-y-0.5 active:shadow-[0_4px_12px_-6px_rgb(132_160_0/0.7)] motion-safe:active:translate-y-0 motion-safe:active:scale-[0.98]",
 };
 
 const sizes: Record<Size, string> = {
   md: "px-3 py-1.5 text-sm",
   lg: "px-4 py-2.5 text-base",
-  xl: "px-6 py-3.5 text-base",
+  xl: "px-8 py-[18px] text-[17px]",
 };
 
 // disabled: comes after hover: in Tailwind's order, so these also beat the

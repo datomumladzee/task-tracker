@@ -24,8 +24,6 @@
 
   --color-lime: #dbff00;
   --color-lime-hover: #c8eb00;
-  /* Pressed lime, for the call-to-action button. Navy on it is about 8.7:1. */
-  --color-lime-press: #b5d000;
 
   --color-danger: #b91c1c;
   --color-danger-bg: #fef2f2;
@@ -107,5 +105,22 @@ body {
   :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
     outline: 2px solid var(--color-navy);
     outline-offset: 2px;
+  }
+
+  /* The hand pointer on everything clickable, set once here instead of per
+     component. Tailwind's base styles give buttons the plain arrow, which is
+     why "Cancel" and friends showed no hand. Covers buttons (so filters,
+     cards, avatars and the dropdown and menu triggers, which are buttons),
+     links, dropdown options, menu items, tabs, checkboxes and radios. Text
+     fields keep their text cursor. */
+  :where(button, a[href], summary, select, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], [role="combobox"], input[type="checkbox"], input[type="radio"], label:has(> input[type="checkbox"]), label:has(> input[type="radio"])) {
+    cursor: pointer;
+  }
+
+  /* Anything disabled shows "not allowed" instead. After the rule above,
+     with the same zero specificity, so it wins. */
+  :where(button, select, input, textarea, [role="button"], [role="menuitem"], [role="option"], [role="combobox"]):disabled,
+  :where([aria-disabled="true"]) {
+    cursor: not-allowed;
   }
 }
