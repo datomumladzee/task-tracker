@@ -17,6 +17,7 @@
 // pressed. The icon has no text, so the aria-label is the button's name.
 
 import { useId, useState } from "react";
+import { fieldClass, fieldShape, fieldSizes } from "./field";
 
 // size replaces the native <input size>, a character width nobody uses here.
 // lg matches a size="lg" Button: 46px tall. Dark fields are lg by default.
@@ -27,26 +28,23 @@ type Props = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> & {
   error?: string;
 };
 
-const sizes = {
-  md: "px-2 py-1.5",
-  lg: "px-3 py-2.5 text-base",
-};
 
 const looks = {
   light: {
     label: "text-ink",
-    // placeholder:text-muted: Tailwind's default (text at 50%) is about 3.2:1
-    // on white; muted is about 5.5:1.
-    field: "bg-card placeholder:text-muted focus:border-navy",
-    border: "border-line",
-    bad: "border-danger",
+    // Light fields take their whole look from ui/field.ts.
+    field: "",
+    border: "",
+    bad: "",
     message: "text-danger",
     // Navy, not lime: lime on white is about 1.15:1 and would vanish.
     reveal: "text-muted hover:text-navy focus-visible:text-navy",
   },
   dark: {
     label: "text-on-dark",
-    field: "bg-field-on-dark text-on-dark placeholder:text-muted-on-dark focus:border-lime",
+    // On the navy sign-in card: a lime halo instead of navy, which would
+    // vanish on navy. Lime on navy is about 12.6:1.
+    field: "bg-field-on-dark text-on-dark placeholder:text-muted-on-dark focus:border-lime focus:shadow-[0_0_0_4px_rgb(219_255_0/0.25)]",
     border: "border-field-line-on-dark",
     bad: "border-danger-on-dark",
     message: "text-danger-on-dark",
@@ -56,7 +54,11 @@ const looks = {
 
 export function Input({ label, tone = "light", size, error, className = "", id, type, ...props }: Props) {
   const look = looks[tone];
-  const padding = sizes[size ?? (tone === "dark" ? "lg" : "md")];
+  const fieldSize = size ?? (tone === "dark" ? "lg" : "md");
+  const fieldLook =
+    tone === "light"
+      ? fieldClass(fieldSize, !!error)
+      : `${fieldShape} ${fieldSizes[fieldSize]} ${look.field} ${error ? look.bad : look.border}`;
   const autoId = useId();
   const inputId = id ?? `${autoId}-input`;
   const messageId = `${autoId}-message`;
@@ -75,7 +77,7 @@ export function Input({ label, tone = "light", size, error, className = "", id, 
         <input
           id={inputId}
           type={revealable && shown ? "text" : type}
-          className={`w-full rounded border ${padding} ${look.field} ${error ? look.bad : look.border} ${revealable ? "pr-11" : ""} ${className}`}
+          className={`${fieldLook} ${revealable ? "pr-11" : ""} ${className}`}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? messageId : undefined}
           {...props}

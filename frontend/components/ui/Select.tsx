@@ -56,11 +56,14 @@ type Props = {
 
 const sizes: Record<Size, string> = {
   sm: "min-h-7 gap-1.5 px-2.5 py-1 text-xs",
-  md: "min-h-[34px] gap-2 px-2.5 py-1.5 text-sm",
+  md: "min-h-[34px] gap-2 px-3 py-1.5 text-sm",
   lg: "min-h-[46px] gap-2 px-3 py-2.5 text-base",
 };
 
-const defaultLook = "rounded border border-line bg-card text-ink hover:border-muted/50 disabled:bg-page disabled:text-muted";
+// The same look as the text fields (ui/field.ts): field-edge border, 8px
+// corners, and the navy border and halo on keyboard focus or while open.
+const defaultLook =
+  "rounded-lg border border-field-edge bg-card text-ink shadow-[0_1px_2px_rgb(16_44_64/0.05)] transition-[border-color,box-shadow] duration-150 hover:border-muted focus-visible:border-navy focus-visible:shadow-[0_0_0_4px_rgb(16_44_64/0.14)] focus-visible:outline-none aria-expanded:border-navy aria-expanded:shadow-[0_0_0_4px_rgb(16_44_64/0.14)] disabled:bg-page disabled:text-muted";
 
 export function Select({
   value,

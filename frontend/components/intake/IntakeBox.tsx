@@ -8,6 +8,7 @@
 //   422  the sentence was empty or over 2000 characters
 //   0    the backend could not be reached at all
 
+import { fieldClass } from "../ui/field";
 import { useState } from "react";
 import Link from "next/link";
 import { DraftCard } from "./DraftCard";
@@ -83,7 +84,7 @@ export function IntakeBox({ projects, currentProjectId, onCreated }: Props) {
           placeholder='Describe a task, e.g. "ship auth docs by friday, assign to me"'
           maxLength={2000}
           disabled={busy}
-          className="flex-1 rounded border border-line bg-card px-3 py-2"
+          className={`min-w-0 flex-1 ${fieldClass("md")}`}
         />
         <Button type="submit" disabled={busy || waiting || !text.trim()}>
           {busy ? "Reading..." : waiting ? `Wait ${wait}s` : "Draft it"}

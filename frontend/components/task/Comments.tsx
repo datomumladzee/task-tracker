@@ -5,6 +5,7 @@
 // Decision: no comment editing in the UI yet. The backend allows the author
 // to edit, but the step asked for reading and adding; deleting covers typos.
 
+import { fieldClass } from "../ui/field";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/Button";
 import { ErrorText } from "../ui/ErrorText";
@@ -90,7 +91,7 @@ export function Comments({ task, role, currentUserId }: Props) {
             onChange={(e) => setBody(e.target.value)}
             maxLength={5000}
             rows={2}
-            className="w-full rounded border border-line bg-card px-2 py-1.5 text-sm"
+            className={fieldClass("md")}
           />
           <Button type="submit" variant="secondary" disabled={busy || !body.trim()}>{busy ? "Posting..." : "Add comment"}</Button>
         </form>

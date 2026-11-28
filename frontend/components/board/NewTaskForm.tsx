@@ -3,6 +3,7 @@
 // The plain way to add a task, next to the AI way. Title and priority only;
 // the rest can wait for the task detail view in week 5.
 
+import { fieldClass, fieldHalo } from "../ui/field";
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { PriorityBars } from "../ui/PriorityBars";
@@ -56,7 +57,7 @@ export function NewTaskForm({ projectId, onCreated }: Props) {
           maxLength={200}
           // min-w-0: an input has a built-in minimum width, which pushed the
           // Add button 3px off a 375px screen.
-          className="min-w-0 flex-1 rounded border border-line bg-card px-2 py-1.5 text-sm placeholder:text-muted hover:border-muted/50 focus:border-navy"
+          className={`min-w-0 flex-1 ${fieldClass("md")}`}
         />
         {/* The shared dropdown, the same height as the title field, with
             the priority bars from the task cards; red only for high. */}
@@ -65,7 +66,7 @@ export function NewTaskForm({ projectId, onCreated }: Props) {
           value={priority}
           onChange={(v) => setPriority(v as TaskPriority)}
           options={priorityOptions}
-          look={priority === "high" ? "rounded border border-danger/40 bg-danger-bg text-danger" : undefined}
+          look={priority === "high" ? `rounded-lg border border-danger/40 bg-danger-bg text-danger ${fieldHalo} focus-visible:outline-none` : undefined}
         />
         <Button type="submit" variant="secondary" disabled={busy || !title.trim()}>Add</Button>
       </div>

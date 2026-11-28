@@ -18,6 +18,9 @@
   --color-ink: #0b1f2e;
   --color-muted: #5b6b78;
   --color-line: #dce3e8;
+  /* Text field borders: darker than line so a field's edge reaches about
+     3.3:1 on white, the contrast a control's boundary needs. */
+  --color-field-edge: #7f8f9c;
 
   --color-lime: #dbff00;
   --color-lime-hover: #c8eb00;
@@ -94,9 +97,15 @@ body {
 
 /* One focus ring for everything you can tab to: navy, 2px, with a 2px gap.
    focus-visible shows it for the keyboard and on text fields, but not after
-   a mouse click on a button. :where() keeps its specificity at zero, so a
-   component can still override it. */
-:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-navy);
-  outline-offset: 2px;
+   a mouse click on a button. Text fields replace it with their own navy
+   border and halo (ui/field.ts).
+
+   In @layer base on purpose: Tailwind's classes live in layers, and a rule
+   outside every layer beats all of them, whatever their specificity. Out
+   here, a field's focus-visible:outline-none could never win. */
+@layer base {
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-navy);
+    outline-offset: 2px;
+  }
 }

@@ -4,6 +4,7 @@
 // field and must answer the resolver's questions; Confirm stays off until the
 // draft is ready. Nothing is saved as a task until Confirm succeeds.
 
+import { fieldClass } from "../ui/field";
 import { useEffect, useState } from "react";
 import { AiBadge } from "../AiBadge";
 import { AssigneeChoice } from "./AssigneeChoice";
@@ -41,7 +42,8 @@ type Props = {
 // to parse again, a used one can only be dismissed.
 type Failure = { message: string; kind: "expired" | "used" | "other" };
 
-const fieldClass = "w-full rounded border border-line bg-card px-2 py-1.5";
+// The app-wide field look (ui/field.ts).
+const fieldStyle = fieldClass("md");
 
 // Each field also gets an aria-label. A <select> inside its <label> would
 // otherwise be named by the label plus the text of every option in it.
@@ -178,7 +180,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
             value={title}
             maxLength={200}
             onChange={(e) => edit("title", e.target.value, draft.title)}
-            className={fieldClass}
+            className={fieldStyle}
           />
         </label>
 
@@ -190,7 +192,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
             rows={2}
             // Empty means no description: null, which confirm accepts.
             onChange={(e) => edit("description", e.target.value || null, draft.description)}
-            className={fieldClass}
+            className={fieldStyle}
           />
         </label>
 
@@ -201,7 +203,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
             type="date"
             value={dueDate ?? ""}
             onChange={(e) => edit("due_date", e.target.value || null, draft.due_date)}
-            className={fieldClass}
+            className={fieldStyle}
           />
         </label>
 
@@ -238,7 +240,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
             ]}
             // Tinted like everywhere else once a status is chosen; "Not
             // said" stays plain.
-            look={status ? `rounded border ${statusStyle[status].bg} ${statusStyle[status].text} ${statusStyle[status].fieldBorder}` : undefined}
+            look={status ? `rounded-lg border ${statusStyle[status].bg} ${statusStyle[status].text} ${statusStyle[status].fieldBorder}` : undefined}
           />
         </label>
 
