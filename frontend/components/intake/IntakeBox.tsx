@@ -8,6 +8,7 @@
 //   422  the sentence was empty or over 2000 characters
 //   0    the backend could not be reached at all
 
+import { LIMITS } from "@/lib/limits";
 import { fieldClass } from "../ui/field";
 import { useState } from "react";
 import Link from "next/link";
@@ -82,7 +83,7 @@ export function IntakeBox({ projects, currentProjectId, onCreated }: Props) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder='Describe a task, e.g. "ship auth docs by friday, assign to me"'
-          maxLength={2000}
+          maxLength={LIMITS.intakeText}
           disabled={busy}
           className={`min-w-0 flex-1 ${fieldClass("md")}`}
         />

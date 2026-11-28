@@ -127,3 +127,34 @@ async def test_disabled_account_cannot_log_in(register, login, db):
     response = await login("off@example.com")
 
     assert response.status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# length limits on login
+# ---------------------------------------------------------------------------
+
+
+async def test_login_password_over_128_is_rejected_before_any_hashing(login, register):
+    await register()
+
+    response = await login(password="x" * 129)
+
+    # 422 from the schema, before the slow Argon2 check ever runs.
+    assert response.status_code == 422
+
+
+async def test_login_password_of_exactly_128_is_still_checked(login, register):
+    await register()
+
+    response = await login(password="x" * 128)
+
+    # Accepted by the schema, then refused as a wrong password.
+    assert response.status_code == 401
+
+
+async def test_login_email_over_320_is_rejected(client):
+    email = "a" * 63 + "." + "b" * 63 + "." + "c" * 63 + "." + "d" * 63 + "." + "e" * 55 + "@example.com"
+
+    response = await client.post("/auth/login", json={"email": email, "password": "hunter2!!"})
+
+    assert response.status_code == 422

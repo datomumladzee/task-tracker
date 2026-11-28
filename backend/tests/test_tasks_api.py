@@ -237,3 +237,35 @@ async def test_a_task_whose_assignee_was_disabled_can_still_be_edited(client: As
     cleared = await client.patch(url, json={"assignee_id": None}, headers=board.h["admin"])
     assert cleared.status_code == 200
     assert cleared.json()["assignee"] is None
+
+
+# ---------------------------------------------------------------------------
+# length limits
+# ---------------------------------------------------------------------------
+
+
+async def test_description_of_exactly_5000_is_accepted(client: AsyncClient, board):
+    response = await client.post(
+        board.url, json={"title": "Long", "description": "x" * 5000}, headers=board.h["admin"]
+    )
+
+    assert response.status_code == 201
+    assert len(response.json()["description"]) == 5000
+
+
+async def test_description_over_5000_is_rejected_on_create(client: AsyncClient, board):
+    response = await client.post(
+        board.url, json={"title": "Too long", "description": "x" * 5001}, headers=board.h["admin"]
+    )
+
+    assert response.status_code == 422
+
+
+async def test_description_over_5000_is_rejected_on_edit(client: AsyncClient, board):
+    tid = next(iter(board.ids.values()))
+
+    response = await client.patch(
+        f"{board.url}/{tid}", json={"description": "x" * 5001}, headers=board.h["admin"]
+    )
+
+    assert response.status_code == 422

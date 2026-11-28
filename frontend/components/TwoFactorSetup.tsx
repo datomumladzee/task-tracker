@@ -9,6 +9,7 @@
 // provisioning URI to an online QR service would hand the secret to a third
 // party. The secret stays in component state and is never stored.
 
+import { LIMITS } from "@/lib/limits";
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "./ui/Button";
@@ -112,6 +113,7 @@ export function TwoFactorSetup({ enabled, onVerified }: Props) {
               <form onSubmit={verify} className="flex max-w-xs items-end gap-2">
                 <Input
                   label="Code"
+                  maxLength={LIMITS.code}
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   inputMode="numeric"

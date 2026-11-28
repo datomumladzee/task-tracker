@@ -3,6 +3,8 @@
 // The task's fields. Editable for standard and admin, read-only for viewers,
 // who may see a task but not change it.
 
+import { CharCount } from "../ui/CharCount";
+import { LIMITS } from "@/lib/limits";
 import { fieldClass } from "../ui/field";
 import { Select } from "../ui/Select";
 import { useState } from "react";
@@ -59,11 +61,12 @@ export function TaskEditForm({ task, members, canEdit, onSaved }: Props) {
     <form onSubmit={save} className="space-y-3">
       <label className="block text-sm">
         <span className="mb-1 block font-medium text-ink">Title</span>
-        <input aria-label="Title" value={form.title} onChange={(e) => set("title", e.target.value)} maxLength={200} disabled={!canEdit} className={fieldStyle} />
+        <input aria-label="Title" value={form.title} onChange={(e) => set("title", e.target.value)} maxLength={LIMITS.taskTitle} disabled={!canEdit} className={fieldStyle} />
       </label>
       <label className="block text-sm">
         <span className="mb-1 block font-medium text-ink">Description</span>
-        <textarea aria-label="Description" value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} disabled={!canEdit} className={fieldStyle} />
+        <textarea aria-label="Description" value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} maxLength={LIMITS.taskDescription} disabled={!canEdit} className={fieldStyle} />
+        <CharCount length={form.description.length} max={LIMITS.taskDescription} />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block text-sm">

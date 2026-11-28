@@ -3,6 +3,7 @@
 // Create a project. Any logged-in user may, and becomes its admin.
 // Opened from the "New project" button; Cancel or Escape closes it.
 
+import { LIMITS } from "@/lib/limits";
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { ErrorText } from "../ui/ErrorText";
@@ -55,12 +56,13 @@ export function NewProjectForm({ onCreated, onCancel }: Props) {
           placeholder="Website relaunch"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          maxLength={200}
+          maxLength={LIMITS.projectName}
           autoFocus
           required
         />
         <Input
           label="Description (optional)"
+          maxLength={LIMITS.projectDescription}
           size="lg"
           placeholder="What this project is for"
           value={description}

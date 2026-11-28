@@ -153,7 +153,8 @@ class DraftConfirm(BaseModel):
     project_id: int | None = None
     assignee_id: int | None = None
     title: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)] | None = None
-    description: str | None = None
+    # The same 5,000 as a task's description, since this becomes one.
+    description: Annotated[str, StringConstraints(max_length=5000)] | None = None
     due_date: date | None = None
     priority: TaskPriority | None = None
     status: TaskStatus | None = None

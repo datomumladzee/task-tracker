@@ -5,6 +5,8 @@
 // Decision: no comment editing in the UI yet. The backend allows the author
 // to edit, but the step asked for reading and adding; deleting covers typos.
 
+import { CharCount } from "../ui/CharCount";
+import { LIMITS } from "@/lib/limits";
 import { fieldClass } from "../ui/field";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/Button";
@@ -89,10 +91,11 @@ export function Comments({ task, role, currentUserId }: Props) {
             placeholder="Write a comment"
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            maxLength={5000}
+            maxLength={LIMITS.comment}
             rows={2}
             className={fieldClass("md")}
           />
+          <CharCount length={body.length} max={LIMITS.comment} />
           <Button type="submit" variant="secondary" disabled={busy || !body.trim()}>{busy ? "Posting..." : "Add comment"}</Button>
         </form>
       )}

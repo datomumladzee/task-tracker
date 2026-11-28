@@ -3,6 +3,7 @@
 // Create an account, then log straight in. A new account has 2FA off, so the
 // login reply always carries an access token here.
 
+import { LIMITS } from "@/lib/limits";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -53,6 +54,7 @@ export default function RegisterPage() {
         <Input
           tone="dark"
           label="Full name"
+          maxLength={LIMITS.fullName}
           name="fullName"
           placeholder="Your full name"
           value={fullName}
@@ -67,6 +69,7 @@ export default function RegisterPage() {
         <Input
           tone="dark"
           label="Email"
+          maxLength={LIMITS.email}
           name="email"
           type="email"
           placeholder="you@example.com"
@@ -95,7 +98,7 @@ export default function RegisterPage() {
           error={errors.password}
           autoComplete="new-password"
           minLength={8}
-          maxLength={128}
+          maxLength={LIMITS.password}
           required
         />
         <ErrorText message={error} tone="dark" />

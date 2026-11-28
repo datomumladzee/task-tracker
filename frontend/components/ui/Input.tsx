@@ -17,6 +17,7 @@
 // pressed. The icon has no text, so the aria-label is the button's name.
 
 import { useId, useState } from "react";
+import { CharCount } from "./CharCount";
 import { fieldClass, fieldShape, fieldSizes } from "./field";
 
 // size replaces the native <input size>, a character width nobody uses here.
@@ -94,6 +95,9 @@ export function Input({ label, tone = "light", size, error, className = "", id, 
           </button>
         )}
       </div>
+      {props.maxLength !== undefined && typeof props.value === "string" && type !== "password" && (
+        <CharCount length={props.value.length} max={props.maxLength} tone={tone} />
+      )}
       {error && (
         <p id={messageId} className={`mt-1 text-xs ${look.message}`}>
           {error}

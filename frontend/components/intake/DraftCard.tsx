@@ -4,6 +4,8 @@
 // field and must answer the resolver's questions; Confirm stays off until the
 // draft is ready. Nothing is saved as a task until Confirm succeeds.
 
+import { CharCount } from "../ui/CharCount";
+import { LIMITS } from "@/lib/limits";
 import { fieldClass } from "../ui/field";
 import { useEffect, useState } from "react";
 import { AiBadge } from "../AiBadge";
@@ -178,7 +180,7 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
           <input
             aria-label="Title"
             value={title}
-            maxLength={200}
+            maxLength={LIMITS.taskTitle}
             onChange={(e) => edit("title", e.target.value, draft.title)}
             className={fieldStyle}
           />
@@ -192,8 +194,10 @@ export function DraftCard({ parsed, projects, onCreated, onReparse, onDiscard }:
             rows={2}
             // Empty means no description: null, which confirm accepts.
             onChange={(e) => edit("description", e.target.value || null, draft.description)}
+            maxLength={LIMITS.taskDescription}
             className={fieldStyle}
           />
+          <CharCount length={(description ?? "").length} max={LIMITS.taskDescription} />
         </label>
 
         <label className="block text-sm">

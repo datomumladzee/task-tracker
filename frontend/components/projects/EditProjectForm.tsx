@@ -6,6 +6,7 @@
 // Sends only what changed, so saving an untouched form is not offered. An
 // emptied description is sent as null, which clears it. Escape cancels.
 
+import { LIMITS } from "@/lib/limits";
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { ErrorText } from "../ui/ErrorText";
@@ -59,9 +60,10 @@ export function EditProjectForm({ project, onSaved, onCancel }: Props) {
     >
       <h2 id="edit-project-title" className="font-brand text-lg font-semibold text-ink">Edit project</h2>
       <div className="grid gap-5 md:grid-cols-2">
-        <Input label="Name" size="lg" value={name} onChange={(e) => setName(e.target.value)} maxLength={200} autoFocus required />
+        <Input label="Name" size="lg" value={name} onChange={(e) => setName(e.target.value)} maxLength={LIMITS.projectName} autoFocus required />
         <Input
           label="Description (optional)"
+          maxLength={LIMITS.projectDescription}
           size="lg"
           placeholder="What this project is for"
           value={description}

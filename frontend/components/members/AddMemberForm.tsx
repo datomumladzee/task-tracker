@@ -4,6 +4,7 @@
 // The backend answers 404 when no active account has that email, and 409
 // when the person is already in; both messages are shown as they come.
 
+import { LIMITS } from "@/lib/limits";
 import { Select } from "../ui/Select";
 import { useState } from "react";
 import { Button } from "../ui/Button";
@@ -38,7 +39,7 @@ export function AddMemberForm({ projectId, onAdded }: { projectId: number; onAdd
     <form onSubmit={submit} className="space-y-3 rounded-lg border border-line bg-card p-4">
       <h2 className="font-semibold">Add a person</h2>
       <p className="text-xs text-muted">They need an account already. Adding does not send an invite.</p>
-      <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={LIMITS.email} required />
       <label className="block text-sm">
         <span className="mb-1 block font-medium text-ink">Role</span>
         <Select

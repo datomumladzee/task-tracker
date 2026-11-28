@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, EmailStr, StringConstraints, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints, field_validator
 
 from app.projects.models import ProjectRole
 from app.users.schemas import UserSummary
@@ -13,10 +13,14 @@ ProjectName = Annotated[
     StringConstraints(strip_whitespace=True, min_length=1, max_length=200),
 ]
 
+# A project description is a sentence or a short paragraph; the column is
+# Text, so this is the only limit.
+ProjectDescription = Annotated[str, StringConstraints(max_length=1000)]
+
 
 class ProjectCreate(BaseModel):
     name: ProjectName
-    description: str | None = None
+    description: ProjectDescription | None = None
 
 
 class ProjectUpdate(BaseModel):
@@ -28,7 +32,7 @@ class ProjectUpdate(BaseModel):
     """
 
     name: ProjectName | None = None
-    description: str | None = None
+    description: ProjectDescription | None = None
 
     @field_validator("name")
     @classmethod
@@ -83,7 +87,8 @@ class MemberAdd(BaseModel):
     it is what week 3 will resolve "assign to Dato" against anyway.
     """
 
-    email: EmailStr
+    # 320, the users.email column and the register limit.
+    email: EmailStr = Field(max_length=320)
     role: ProjectRole = ProjectRole.STANDARD
 
 

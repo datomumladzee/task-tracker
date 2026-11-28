@@ -11,6 +11,11 @@ TaskTitle = Annotated[
     StringConstraints(strip_whitespace=True, min_length=1, max_length=200),
 ]
 
+# The column is Text, so the database would take any length. 5,000 is the
+# same ceiling as a comment: room for a real write-up, not for a pasted log
+# file that every board load then has to carry.
+TaskDescription = Annotated[str, StringConstraints(max_length=5000)]
+
 
 class TaskCreate(BaseModel):
     """What creating a task accepts.
@@ -20,7 +25,7 @@ class TaskCreate(BaseModel):
     """
 
     title: TaskTitle
-    description: str | None = None
+    description: TaskDescription | None = None
     status: TaskStatus = TaskStatus.TODO
     priority: TaskPriority = TaskPriority.MEDIUM
     due_date: date | None = None
@@ -38,7 +43,7 @@ class TaskUpdate(BaseModel):
     """
 
     title: TaskTitle | None = None
-    description: str | None = None
+    description: TaskDescription | None = None
     priority: TaskPriority | None = None
     due_date: date | None = None
     assignee_id: int | None = None

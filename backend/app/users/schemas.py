@@ -72,13 +72,15 @@ class UserSummary(BaseModel):
 class LoginRequest(BaseModel):
     """What POST /auth/login accepts.
 
-    No length rules on password here. Login checks a hash, it does not create
-    one, and rejecting a too-short password at login would leak the fact that
-    the stored one is short.
+    No minimum on password: login checks a hash, it does not create one, and
+    rejecting a too-short password at login would leak that the stored one
+    is short. There is a maximum, 128, the same as register: no account can
+    have a longer password, and without it anyone could send megabytes and
+    make the server run the deliberately slow Argon2 hash over all of it.
     """
 
-    email: EmailStr
-    password: str
+    email: EmailStr = Field(max_length=320)
+    password: str = Field(max_length=128)
 
 
 class LoginResponse(BaseModel):

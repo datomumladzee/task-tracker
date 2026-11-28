@@ -416,3 +416,26 @@ async def test_failed_ai_calls_still_count(client: AsyncClient, team, model):
     model.next = _draft()
     assert (await _parse(client, team)).status_code == 429
 
+
+
+
+# ---------------------------------------------------------------------------
+# length limits on confirm
+# ---------------------------------------------------------------------------
+
+
+async def test_confirm_rejects_a_description_over_5000(client: AsyncClient, team, model):
+    draft_id = (await _parse(client, team)).json()["draft_id"]
+
+    response = await _confirm(client, team, draft_id, description="x" * 5001)
+
+    assert response.status_code == 422
+
+
+async def test_confirm_accepts_a_description_of_exactly_5000(client: AsyncClient, team, model):
+    draft_id = (await _parse(client, team)).json()["draft_id"]
+
+    response = await _confirm(client, team, draft_id, description="x" * 5000)
+
+    assert response.status_code == 201
+    assert len(response.json()["description"]) == 5000

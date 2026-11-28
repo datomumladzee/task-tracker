@@ -8,6 +8,7 @@
 // The pending token is kept in component state only, never in localStorage.
 // It is worth nothing without the code, and gone if the page is closed.
 
+import { LIMITS } from "@/lib/limits";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -100,6 +101,7 @@ export default function LoginPage() {
           <Input
             tone="dark"
             label="Code"
+            maxLength={LIMITS.code}
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
             inputMode="numeric"
@@ -125,6 +127,7 @@ export default function LoginPage() {
         <Input
           tone="dark"
           label="Email"
+          maxLength={LIMITS.email}
           name="email"
           type="email"
           placeholder="you@example.com"
@@ -140,6 +143,7 @@ export default function LoginPage() {
         <Input
           tone="dark"
           label="Password"
+          maxLength={LIMITS.password}
           name="password"
           type="password"
           placeholder="••••••••"

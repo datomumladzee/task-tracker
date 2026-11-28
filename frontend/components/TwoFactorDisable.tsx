@@ -9,6 +9,7 @@
 // code" without saying which, and retyping the password every time would
 // punish the usual case, a code that ran out while typing.
 
+import { LIMITS } from "@/lib/limits";
 import { useState } from "react";
 import { Button } from "./ui/Button";
 import { ErrorText } from "./ui/ErrorText";
@@ -79,6 +80,7 @@ export function TwoFactorDisable({ onDisabled }: { onDisabled: (user: User) => v
       </div>
       <Input
         label="Password"
+        maxLength={LIMITS.password}
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
@@ -89,6 +91,7 @@ export function TwoFactorDisable({ onDisabled }: { onDisabled: (user: User) => v
       <Input
         id={CODE_ID}
         label="Code"
+        maxLength={LIMITS.code}
         value={code}
         onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
         inputMode="numeric"

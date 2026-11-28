@@ -3,6 +3,7 @@
 // The plain way to add a task, next to the AI way. Title and priority only;
 // the rest can wait for the task detail view in week 5.
 
+import { LIMITS } from "@/lib/limits";
 import { fieldClass, fieldHalo } from "../ui/field";
 import { useState } from "react";
 import { Button } from "../ui/Button";
@@ -54,7 +55,7 @@ export function NewTaskForm({ projectId, onCreated }: Props) {
           placeholder="New task title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          maxLength={200}
+          maxLength={LIMITS.taskTitle}
           // min-w-0: an input has a built-in minimum width, which pushed the
           // Add button 3px off a 375px screen.
           className={`min-w-0 flex-1 ${fieldClass("md")}`}

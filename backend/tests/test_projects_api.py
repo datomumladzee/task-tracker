@@ -283,3 +283,44 @@ async def test_creating_a_project_returns_role_admin(client: AsyncClient, auth_h
 
     assert response.status_code == 201
     assert response.json()["role"] == "admin"
+
+
+# ---------------------------------------------------------------------------
+# length limits
+# ---------------------------------------------------------------------------
+
+
+async def test_project_description_of_exactly_1000_is_accepted(client: AsyncClient, team):
+    response = await client.post(
+        "/projects", json={"name": "Long", "description": "x" * 1000}, headers=team.h["admin"]
+    )
+
+    assert response.status_code == 201
+
+
+async def test_project_description_over_1000_is_rejected_on_create(client: AsyncClient, team):
+    response = await client.post(
+        "/projects", json={"name": "Too long", "description": "x" * 1001}, headers=team.h["admin"]
+    )
+
+    assert response.status_code == 422
+
+
+async def test_project_description_over_1000_is_rejected_on_edit(client: AsyncClient, team):
+    response = await client.patch(
+        f"/projects/{team.pid}", json={"description": "x" * 1001}, headers=team.h["admin"]
+    )
+
+    assert response.status_code == 422
+
+
+async def test_adding_a_member_with_an_email_over_320_is_rejected(client: AsyncClient, team):
+    # A syntactically valid address, just too long: 310 + "@example.com".
+    email = "a" * 63 + "." + "b" * 63 + "." + "c" * 63 + "." + "d" * 63 + "." + "e" * 55 + "@example.com"
+    assert len(email) > 320
+
+    response = await client.post(
+        f"/projects/{team.pid}/members", json={"email": email, "role": "viewer"}, headers=team.h["admin"]
+    )
+
+    assert response.status_code == 422
