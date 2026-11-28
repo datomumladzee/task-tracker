@@ -290,6 +290,33 @@ async def test_creating_a_project_returns_role_admin(client: AsyncClient, auth_h
 # ---------------------------------------------------------------------------
 
 
+async def test_project_name_of_exactly_200_is_accepted(client: AsyncClient, team):
+    response = await client.post("/projects", json={"name": "x" * 200}, headers=team.h["admin"])
+
+    assert response.status_code == 201
+    assert response.json()["name"] == "x" * 200
+
+
+async def test_project_name_over_200_is_rejected_on_create(client: AsyncClient, team):
+    response = await client.post("/projects", json={"name": "x" * 201}, headers=team.h["admin"])
+
+    assert response.status_code == 422
+
+
+async def test_project_name_over_200_is_rejected_on_edit(client: AsyncClient, team):
+    response = await client.patch(f"/projects/{team.pid}", json={"name": "x" * 201}, headers=team.h["admin"])
+
+    assert response.status_code == 422
+
+
+async def test_project_name_limit_counts_after_trimming(client: AsyncClient, team):
+    # Spaces at the ends are stripped first, so they do not use up the limit.
+    response = await client.post("/projects", json={"name": "  " + "x" * 200 + "  "}, headers=team.h["admin"])
+
+    assert response.status_code == 201
+    assert response.json()["name"] == "x" * 200
+
+
 async def test_project_description_of_exactly_1000_is_accepted(client: AsyncClient, team):
     response = await client.post(
         "/projects", json={"name": "Long", "description": "x" * 1000}, headers=team.h["admin"]

@@ -114,7 +114,7 @@ export default function ProjectsPage() {
 
       {projects === null && !error && (
         // Two card-shaped placeholders while the list loads.
-        <div className="grid gap-4 md:grid-cols-2" aria-hidden="true">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2" aria-hidden="true">
           {[0, 1].map((i) => (
             <div key={i} className="h-40 rounded-xl border border-line bg-card motion-safe:animate-pulse" />
           ))}
@@ -140,7 +140,11 @@ export default function ProjectsPage() {
       )}
 
       {projects && projects.length > 0 && (
-        <ul className="grid gap-4 md:grid-cols-2">
+        <ul
+          // grid-cols-1 on phones: Tailwind makes it minmax(0, 1fr), so a
+          // long project name is cut inside the card instead of widening it.
+          className="grid grid-cols-1 gap-4 md:grid-cols-2"
+        >
           {shown.map((p) => (
             <li key={p.id}>
               <ProjectCard project={p} stats={statsById.get(p.id)} currentUserId={user?.id} />

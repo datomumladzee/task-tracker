@@ -29,16 +29,26 @@ function Chevron() {
 }
 
 export function Breadcrumb({ trail, current, badge }: Props) {
+  // What gives way when the row is too narrow: a project's name, wherever it
+  // is. With a project link in the trail (Projects › Name › Members) that
+  // link is cut and the heading stays whole; with only "Projects" in the
+  // trail (Projects › Name) the heading is the name, so it is cut instead.
+  // "Projects" itself never shrinks.
+  const trailShrinks = trail.length > 1;
   return (
-    <div className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-1">
-      <nav aria-label="Breadcrumb" className="flex min-w-0 flex-wrap items-center gap-1">
+    // One line. A long project name is cut with an ellipsis (in a trail link
+    // or the heading) and shown in full in its tooltip; the badge never
+    // shrinks.
+    <div className="flex min-w-0 items-center gap-x-1">
+      <nav aria-label="Breadcrumb" className={`flex items-center gap-1 ${trailShrinks ? "min-w-0" : "shrink-0"}`}>
         {trail.map(({ label, href }, i) => (
-          <span key={href} className="flex min-w-0 items-center gap-1">
+          <span key={href} className={`flex min-w-0 items-center gap-1 ${i === 0 ? "shrink-0" : ""}`}>
             {/* -ml-2 on the first link lines its text up with the page edge
                 while its hover pill still has room. */}
             <Link
               href={href}
-              className={`truncate rounded-md px-2 py-1 text-sm font-medium text-muted transition-colors hover:bg-line/60 hover:text-navy ${i === 0 ? "-ml-2" : ""}`}
+              title={label}
+              className={`block max-w-[16rem] truncate rounded-md px-2 py-1 text-sm font-medium text-muted transition-colors hover:bg-line/60 hover:text-navy ${i === 0 ? "-ml-2" : ""}`}
             >
               {label}
             </Link>
@@ -46,8 +56,10 @@ export function Breadcrumb({ trail, current, badge }: Props) {
           </span>
         ))}
       </nav>
-      <h1 className="ml-1 min-w-0 font-brand text-xl font-semibold text-ink">{current}</h1>
-      {badge && <span className="ml-2 flex items-center">{badge}</span>}
+      <h1 title={current} className={`ml-1 truncate font-brand text-xl font-semibold text-ink ${trailShrinks ? "shrink-0" : "min-w-0"}`}>
+        {current}
+      </h1>
+      {badge && <span className="ml-2 flex shrink-0 items-center">{badge}</span>}
     </div>
   );
 }

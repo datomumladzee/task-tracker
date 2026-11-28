@@ -34,7 +34,9 @@ export function ProjectCard({ project, stats, currentUserId }: Props) {
       <div className="flex items-start gap-3">
         <LetterTile id={project.id} name={project.name} />
         <div className="min-w-0 flex-1">
-          <h2 className="truncate font-brand font-semibold text-ink">{project.name}</h2>
+          <h2 title={project.name} className="truncate font-brand font-semibold text-ink">
+            {project.name}
+          </h2>
           {project.description && <p className="mt-1 line-clamp-2 text-sm text-muted">{project.description}</p>}
         </div>
         <RoleBadge role={project.role} />

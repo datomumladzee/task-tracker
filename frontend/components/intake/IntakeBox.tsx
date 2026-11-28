@@ -104,7 +104,7 @@ export function IntakeBox({ projects, currentProjectId, onCreated }: Props) {
       {!(error && waitUntil && !waiting) && <ErrorText message={error} />}
 
       {created && (
-        <p className="rounded bg-ok-bg px-3 py-2 text-sm text-ok">
+        <p className="rounded bg-ok-bg px-3 py-2 text-sm break-words text-ok">
           Created &ldquo;{created.title}&rdquo;
           {elsewhere ? (
             <>

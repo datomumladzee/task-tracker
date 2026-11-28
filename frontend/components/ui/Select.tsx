@@ -277,7 +277,7 @@ export function Select({
         } ${disabled ? "" : "cursor-pointer"}`}
       >
         {selected?.icon}
-        <span className={`min-w-0 flex-1 truncate ${selected ? "" : "font-normal text-muted"}`}>{selected?.label ?? placeholder}</span>
+        <span title={selected?.label} className={`min-w-0 flex-1 truncate ${selected ? "" : "font-normal text-muted"}`}>{selected?.label ?? placeholder}</span>
         <svg viewBox="0 0 16 16" className={`h-3.5 w-3.5 shrink-0 opacity-70 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M4 6l4 4 4-4" />
         </svg>
@@ -293,7 +293,7 @@ export function Select({
             aria-label={ariaLabel}
             tabIndex={-1}
             style={{ position: "fixed", ...position }}
-            className="z-50 max-w-[calc(100vw-16px)] overflow-y-auto rounded-xl border border-line bg-card p-1 text-sm shadow-lg"
+            className="z-50 max-w-[min(28rem,calc(100vw-16px))] overflow-y-auto rounded-xl border border-line bg-card p-1 text-sm shadow-lg"
           >
             {options.map((o, i) => {
               const isSelected = i === selectedIndex;
@@ -315,7 +315,10 @@ export function Select({
                   } ${isActive && !o.disabled ? "bg-navy text-white" : "text-ink"} ${isSelected ? "font-semibold" : ""}`}
                 >
                   {o.icon}
-                  <span className="min-w-0 flex-1 whitespace-nowrap">{o.label}</span>
+                  {/* Long labels (project names) are cut, full text in the tooltip. */}
+                  <span title={o.label} className="min-w-0 flex-1 truncate">
+                    {o.label}
+                  </span>
                   <svg viewBox="0 0 16 16" className={`h-4 w-4 shrink-0 ${isSelected ? "" : "invisible"}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M3.5 8.5l3 3 6-6.5" />
                   </svg>

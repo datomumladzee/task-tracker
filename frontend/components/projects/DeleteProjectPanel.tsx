@@ -29,9 +29,12 @@ export function DeleteProjectPanel({ project, taskCount, memberCount, onCancel }
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Exact match after trimming, so a stray space does not block it but a
-  // different project's name does.
-  const confirmed = typed.trim() === project.name;
+  // "DELETE" in any case, spaces at the ends ignored. A fixed word instead of
+  // the project's name, which can be 200 characters long.
+  const confirmed = typed.trim().toUpperCase() === "DELETE";
+  // The name is cut to about 60 characters here; the full name is in the
+  // tooltip.
+  const shortName = project.name.length > 60 ? `${project.name.slice(0, 60).trimEnd()}…` : project.name;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,11 +64,15 @@ export function DeleteProjectPanel({ project, taskCount, memberCount, onCancel }
     >
       <h2 id="delete-project-title" className="font-brand text-lg font-semibold text-danger">Delete this project</h2>
       <p className="text-sm text-ink">
-        This deletes <strong>{project.name}</strong> with its {tasks} and their comments, for {people}. It cannot be
+        This deletes{" "}
+        <strong title={project.name} className="break-words">
+          {shortName}
+        </strong>{" "}
+        with its {tasks} and their comments, for {people}. It cannot be
         undone.
       </p>
       <Input
-        label={`Type "${project.name}" to confirm`}
+        label="Type DELETE to confirm"
         size="lg"
         value={typed}
         onChange={(e) => setTyped(e.target.value)}

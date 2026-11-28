@@ -101,7 +101,11 @@ export default function ProjectPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Breadcrumb trail={[{ label: "Projects", href: "/projects" }]} current={project.name} badge={<RoleBadge role={role} />} />
+        {/* Takes the room the buttons leave, at least 16rem before they wrap
+            below it, so a long name is cut instead of pushing them off. */}
+        <div className="min-w-0 flex-[1_1_16rem]">
+          <Breadcrumb trail={[{ label: "Projects", href: "/projects" }]} current={project.name} badge={<RoleBadge role={role} />} />
+        </div>
         <div className="ml-auto flex items-center gap-3">
           <MemberStack projectId={projectId} members={members} />
           {/* Edit and delete share one admin rule today; the menu shows if
