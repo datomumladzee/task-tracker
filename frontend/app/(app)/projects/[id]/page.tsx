@@ -4,6 +4,7 @@
 // panel. The page owns the task list; the pieces below report back what
 // changed, so the board updates without a refresh.
 
+import { Breadcrumb } from "@/components/Breadcrumb";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -100,10 +101,7 @@ export default function ProjectPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Link href="/projects" className="text-sm text-muted hover:text-navy">Projects</Link>
-        <span className="text-muted">/</span>
-        <h1 className="text-xl font-semibold">{project.name}</h1>
-        <RoleBadge role={role} />
+        <Breadcrumb trail={[{ label: "Projects", href: "/projects" }]} current={project.name} badge={<RoleBadge role={role} />} />
         <div className="ml-auto flex items-center gap-3">
           <MemberStack projectId={projectId} members={members} />
           {/* Edit and delete share one admin rule today; the menu shows if

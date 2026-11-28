@@ -3,6 +3,7 @@
 // A project's members with their roles. Everyone sees the list and can leave;
 // only admins see the add form, the role dropdowns and Remove.
 
+import { Breadcrumb } from "@/components/Breadcrumb";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -63,12 +64,14 @@ export default function MembersPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Link href="/projects" className="text-sm text-muted hover:text-navy">Projects</Link>
-        <span className="text-muted">/</span>
-        <Link href={`/projects/${projectId}`} className="text-sm text-muted hover:text-navy">{project.name}</Link>
-        <span className="text-muted">/</span>
-        <h1 className="text-xl font-semibold">Members</h1>
-        <RoleBadge role={project.role} />
+        <Breadcrumb
+          trail={[
+            { label: "Projects", href: "/projects" },
+            { label: project.name, href: `/projects/${projectId}` },
+          ]}
+          current="Members"
+          badge={<RoleBadge role={project.role} />}
+        />
       </div>
       <div className="grid gap-6 md:grid-cols-[1fr_300px]">
         <ul className="space-y-2">
